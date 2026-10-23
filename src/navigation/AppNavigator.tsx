@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamList, MainTabParamList } from './types';
 import { colors, spacing } from '../theme';
 import { useCart } from '../state/CartContext';
+import { useAuth } from '../state/AuthContext';
 import { useLanguage } from '../localization/LanguageContext';
 
 // Screens
@@ -50,6 +51,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const MainTabs: React.FC = () => {
   const { itemCount } = useCart();
+  const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
 
   return (
@@ -117,6 +119,14 @@ const MainTabs: React.FC = () => {
           tabBarLabel: t.tabAccount,
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            if (!isAuthenticated) {
+              e.preventDefault();
+              (navigation as any).navigate('Login');
+            }
+          },
+        })}
       />
     </Tab.Navigator>
   );

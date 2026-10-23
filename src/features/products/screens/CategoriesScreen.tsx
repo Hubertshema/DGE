@@ -47,7 +47,7 @@ export const CategoriesScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Header title="Categories" subtitle="Browse D&G Collections" />
+      <Header title="Categories" subtitle="Browse D&G Collections" showRightActions />
 
       <FlatList
         data={CATEGORIES}

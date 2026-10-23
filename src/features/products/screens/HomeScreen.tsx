@@ -19,7 +19,8 @@ import { CATEGORIES } from '../../../constants/categories';
 import { Product } from '../../../types';
 import { ProductCard } from '../components/ProductCard';
 import { useCart } from '../../../state/CartContext';
-import { Search, ShoppingBag } from 'lucide-react-native';
+import { useLanguage } from '../../../localization/LanguageContext';
+import { Search, ShoppingBag, Globe } from 'lucide-react-native';
 import { useCategoriesQuery, useProductsQuery } from '../../../api/queries';
 import { Logo, ProductListSkeleton, SyncIndicator, Button } from '../../../components/common';
 
@@ -29,6 +30,7 @@ export const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { itemCount, addToCart } = useCart();
+  const { currentLanguage, setLanguage } = useLanguage();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
@@ -66,11 +68,23 @@ export const HomeScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Top Right Corner: Language selector, Search icon, and Cart icon */}
         <View style={styles.headerActions}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setLanguage(currentLanguage === 'en' ? 'rw' : 'en')}
+            style={styles.langPill}
+            accessibilityLabel="Switch language"
+          >
+            <Globe size={15} color={colors.primary} />
+            <Text style={styles.langText}>{currentLanguage.toUpperCase()}</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('MainTabs', { screen: 'SearchTab' } as any)}
             style={styles.iconButton}
+            accessibilityLabel="Search"
           >
             <Search size={22} color={colors.textPrimary} />
           </TouchableOpacity>
@@ -79,6 +93,7 @@ export const HomeScreen: React.FC = () => {
             activeOpacity={0.7}
             onPress={() => navigation.navigate('Cart')}
             style={styles.iconButton}
+            accessibilityLabel="Cart"
           >
             <ShoppingBag size={22} color={colors.textPrimary} />
             {itemCount > 0 ? (
@@ -242,6 +257,23 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  langPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    marginRight: spacing.xs,
+  },
+  langText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.primary,
   },
   iconButton: {
     padding: spacing.xs,

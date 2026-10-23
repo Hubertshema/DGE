@@ -1,13 +1,14 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius } from '../../../theme';
-import { Header, Button, Logo } from '../../../components/common';
+import { Header, Button, Logo, Badge } from '../../../components/common';
 import { useAuth } from '../../../state/AuthContext';
 import { useLanguage } from '../../../localization/LanguageContext';
+import { useOrdersQuery } from '../../../api/queries';
 import {
   Package,
   MapPin,
@@ -18,6 +19,8 @@ import {
   ShieldCheck,
   User,
   Lock,
+  Calendar,
+  ShoppingBag,
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -25,58 +28,116 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export const ProfileScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
-  const { user, isAuthenticated, logout, isAdmin, isSeller } = useAuth();
+  const { user, token, isAuthenticated, logout, isAdmin, isSeller } = useAuth();
   const { t, currentLanguage } = useLanguage();
+
+  // If not authenticated, redirect immediately to Login / Sign-in page
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigation.navigate('Login');
+    }
+  }, [isAuthenticated, navigation]);
+
+  // Fetch customer's orders for direct display in the account area
+  const {
+    data: orders = [],
+    isLoading: isLoadingOrders,
+  } = useOrdersQuery(token);
 
   const isOwner = isAdmin || isSeller;
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'delivered':
+        return <Badge label="Delivered" variant="success" size="small" />;
+      case 'shipped':
+        return <Badge label="Shipped" variant="info" size="small" />;
+      case 'processing':
+        return <Badge label="Processing" variant="info" size="small" />;
+      case 'confirmed':
+        return <Badge label="Confirmed" variant="success" size="small" />;
+      case 'cancelled':
+        return <Badge label="Cancelled" variant="danger" size="small" />;
+      default:
+        return <Badge label="Pending" variant="warning" size="small" />;
+    }
+  };
+
+  const getPaymentBadge = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return <Badge label="Paid" variant="success" size="small" />;
+      case 'payment_rejected':
+        return <Badge label="Payment Rejected" variant="danger" size="small" />;
+      case 'payment_under_review':
+        return <Badge label="Reviewing" variant="info" size="small" />;
+      default:
+        return <Badge label="Awaiting Payment" variant="warning" size="small" />;
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <Header title={t.tabAccount} subtitle="DG Rwanda (Rwamagana)" showLogo={true} showRightActions />
+        <View style={styles.guestContainer}>
+          <View style={styles.avatar}>
+            <User size={36} color={colors.primary} />
+          </View>
+          <Text style={styles.guestTitle}>Sign in to your Account</Text>
+          <Text style={styles.guestMessage}>
+            Please sign in to view your orders, delivery details, and account settings.
+          </Text>
+          <Button
+            title={t.signIn}
+            onPress={() => navigation.navigate('Login')}
+            style={styles.guestBtn}
+          />
+          <Button
+            title={t.signUp}
+            variant="outline"
+            onPress={() => navigation.navigate('Register')}
+            style={styles.guestBtn}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  // Display top 4 most recent orders inside customer account area
+  const recentOrders = orders.slice(0, 4);
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Header title={t.tabAccount} subtitle="DG Rwanda (Rwamagana)" showLogo={true} />
+      <Header
+        title={t.tabAccount}
+        subtitle="DG Rwanda (Rwamagana)"
+        showLogo={true}
+        showRightActions
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* User Card */}
+        {/* User Profile Card */}
         <View style={styles.userCard}>
           <View style={styles.avatar}>
             <User size={32} color={colors.primary} />
           </View>
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>
-              {isAuthenticated && user ? user.fullName : t.welcomeTitle}
-            </Text>
-            <Text style={styles.userEmail}>
-              {isAuthenticated && user
-                ? user.email
-                : 'Sign in to access your orders and profile'}
-            </Text>
+            <Text style={styles.userName}>{user?.fullName || 'Customer'}</Text>
+            <Text style={styles.userEmail}>{user?.email || ''}</Text>
+            {user?.phone ? <Text style={styles.userPhone}>{user.phone}</Text> : null}
             {isOwner ? (
               <View style={styles.adminBadge}>
                 <ShieldCheck size={14} color={colors.primary} />
                 <Text style={styles.adminBadgeText}>DG Shop Owner (Admin)</Text>
               </View>
-            ) : isAuthenticated ? (
+            ) : (
               <View style={styles.customerBadge}>
                 <Text style={styles.customerBadgeText}>Customer Account</Text>
               </View>
-            ) : null}
+            )}
           </View>
         </View>
-
-        {!isAuthenticated ? (
-          <View style={styles.authButtonsRow}>
-            <Button
-              title={t.signIn}
-              onPress={() => navigation.navigate('Login')}
-              style={styles.authBtn}
-            />
-            <Button
-              title={t.signUp}
-              variant="outline"
-              onPress={() => navigation.navigate('Register')}
-              style={styles.authBtn}
-            />
-          </View>
-        ) : null}
 
         {/* DG Shop Owner Admin Section (Exclusive to Admin) */}
         {isOwner ? (
@@ -111,20 +172,100 @@ export const ProfileScreen: React.FC = () => {
           </View>
         ) : null}
 
-        {/* Customer Shopping & Orders Section */}
+        {/* ORDER HISTORY SECTION: Directly visible inside customer's account area */}
         <View style={styles.menuSection}>
-          <Text style={styles.sectionTitle}>{t.myOrders}</Text>
-
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate('MyOrders')}
-          >
-            <View style={styles.menuItemLeft}>
-              <Package size={20} color={colors.primary} />
-              <Text style={styles.menuItemText}>{t.orderHistory}</Text>
+          <View style={styles.sectionHeaderRow}>
+            <View style={styles.sectionHeaderLeft}>
+              <Package size={18} color={colors.primary} />
+              <Text style={styles.sectionTitleText}>{t.orderHistory}</Text>
             </View>
-            <ChevronRight size={18} color={colors.textSecondary} />
-          </TouchableOpacity>
+            {orders.length > 0 ? (
+              <View style={styles.orderCountPill}>
+                <Text style={styles.orderCountText}>{orders.length}</Text>
+              </View>
+            ) : null}
+          </View>
+
+          {isLoadingOrders && orders.length === 0 ? (
+            <View style={styles.ordersLoading}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={styles.ordersLoadingText}>Loading your orders...</Text>
+            </View>
+          ) : orders.length > 0 ? (
+            <View style={styles.ordersListContainer}>
+              {recentOrders.map((order) => {
+                const orderDate = new Date(order.createdAt).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                });
+                const ref = order.orderReference || `#ORD-${order.id.slice(0, 8).toUpperCase()}`;
+
+                return (
+                  <TouchableOpacity
+                    key={order.id}
+                    style={styles.orderCard}
+                    activeOpacity={0.7}
+                    onPress={() => navigation.navigate('OrderDetails', { orderId: order.id })}
+                  >
+                    <View style={styles.orderCardTop}>
+                      <View style={styles.orderRefGroup}>
+                        <Text style={styles.orderRefText}>{ref}</Text>
+                        <View style={styles.orderDateRow}>
+                          <Calendar size={12} color={colors.textSecondary} />
+                          <Text style={styles.orderDateText}>{orderDate}</Text>
+                        </View>
+                      </View>
+                      <View style={styles.orderAmountGroup}>
+                        <Text style={styles.orderAmountText}>
+                          RWF {Number(order.totalAmount).toLocaleString()}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.orderCardBottom}>
+                      <View style={styles.badgesGroup}>
+                        {getStatusBadge(order.status)}
+                        {getPaymentBadge(order.paymentStatus)}
+                      </View>
+                      <ChevronRight size={16} color={colors.textSecondary} />
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+
+              {orders.length > 4 ? (
+                <TouchableOpacity
+                  style={styles.viewAllOrdersBtn}
+                  onPress={() => navigation.navigate('MyOrders')}
+                >
+                  <Text style={styles.viewAllOrdersText}>
+                    View All Orders ({orders.length})
+                  </Text>
+                  <ChevronRight size={16} color={colors.primary} />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          ) : (
+            <View style={styles.emptyOrdersContainer}>
+              <ShoppingBag size={32} color={colors.textSecondary} style={{ marginBottom: 6 }} />
+              <Text style={styles.emptyOrdersTitle}>No orders placed yet</Text>
+              <Text style={styles.emptyOrdersSubtitle}>
+                Your order tracking, receipts, and delivery updates will appear here.
+              </Text>
+              <TouchableOpacity
+                style={styles.shopNowBtn}
+                onPress={() => navigation.navigate('MainTabs', { screen: 'HomeTab' } as any)}
+              >
+                <Text style={styles.shopNowBtnText}>Browse Products</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {/* Account Details & Settings Section */}
+        <View style={styles.menuSection}>
+          <Text style={styles.sectionTitle}>Account Settings</Text>
 
           <TouchableOpacity
             style={styles.menuItem}
@@ -133,6 +274,17 @@ export const ProfileScreen: React.FC = () => {
             <View style={styles.menuItemLeft}>
               <MapPin size={20} color={colors.primary} />
               <Text style={styles.menuItemText}>Delivery Addresses</Text>
+            </View>
+            <ChevronRight size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('ChangePassword', { isFirstLogin: false })}
+          >
+            <View style={styles.menuItemLeft}>
+              <Lock size={20} color={colors.primary} />
+              <Text style={styles.menuItemText}>Change Password</Text>
             </View>
             <ChevronRight size={18} color={colors.textSecondary} />
           </TouchableOpacity>
@@ -156,18 +308,24 @@ export const ProfileScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {isAuthenticated ? (
-          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-            <LogOut size={18} color={colors.danger} />
-            <Text style={styles.logoutText}>{t.logout}</Text>
-          </TouchableOpacity>
-        ) : null}
+        {/* Log Out */}
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={async () => {
+            await logout();
+            navigation.navigate('Login');
+          }}
+        >
+          <LogOut size={18} color={colors.danger} />
+          <Text style={styles.logoutText}>{t.logout}</Text>
+        </TouchableOpacity>
 
+        {/* Brand Footer */}
         <View style={styles.brandFooter}>
           <Logo size={40} />
           <Text style={styles.brandFooterTitle}>DG E-Commerce</Text>
           <Text style={styles.brandFooterText}>
-            Rwamagana, Eastern Province, Rwanda • Single-Shop Model
+            Rwamagana, Eastern Province, Rwanda • Retail Store
           </Text>
         </View>
       </ScrollView>
@@ -182,6 +340,30 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
+  },
+  guestContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
+  guestTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
+  },
+  guestMessage: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+    lineHeight: 18,
+  },
+  guestBtn: {
+    width: '100%',
+    marginBottom: spacing.md,
   },
   userCard: {
     flexDirection: 'row',
@@ -215,6 +397,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 2,
   },
+  userPhone: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 1,
+  },
   adminBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -244,14 +431,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.accent,
   },
-  authButtonsRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  authBtn: {
-    flex: 1,
-  },
   menuSection: {
     backgroundColor: colors.white,
     borderRadius: borderRadius.md,
@@ -269,6 +448,145 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.xs,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  sectionTitleText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  orderCountPill: {
+    backgroundColor: colors.primaryLight,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: borderRadius.full,
+  },
+  orderCountText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  ordersLoading: {
+    padding: spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  ordersLoadingText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  ordersListContainer: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  orderCard: {
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  orderCardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.xs,
+  },
+  orderRefGroup: {
+    flex: 1,
+  },
+  orderRefText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  orderDateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 2,
+  },
+  orderDateText: {
+    fontSize: 11,
+    color: colors.textSecondary,
+  },
+  orderAmountGroup: {
+    alignItems: 'flex-end',
+  },
+  orderAmountText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  orderCardBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+  },
+  badgesGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    flexWrap: 'wrap',
+  },
+  viewAllOrdersBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm,
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+  },
+  viewAllOrdersText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  emptyOrdersContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
+  emptyOrdersTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  emptyOrdersSubtitle: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 2,
+    marginBottom: spacing.md,
+    lineHeight: 16,
+  },
+  shopNowBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: borderRadius.md,
+  },
+  shopNowBtnText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '700',
   },
   menuItem: {
     flexDirection: 'row',
