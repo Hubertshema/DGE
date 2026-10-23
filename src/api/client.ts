@@ -3,8 +3,9 @@ import { Product, Category, Order, User } from '../types';
 
 declare const __DEV__: boolean;
 
-// Production API URL for DG E-Commerce (Rwamagana, Rwanda)
-export const PRODUCTION_API_URL = 'https://api.dgecommerce.rw/api/v1';
+// Production API URL for DG E-Commerce on Render
+export const PRODUCTION_API_URL = 'https://dge-ak8u.onrender.com/api/v1';
+
 
 export const getApiBaseUrl = (): string => {
   // 1. Explicit runtime or build-time environment override if provided
