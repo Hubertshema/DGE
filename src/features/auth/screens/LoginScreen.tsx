@@ -3,18 +3,15 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius } from '../../../theme';
-import { Header, Input, Button, Logo } from '../../../components/common';
+import { Header, Input, Button, Logo, KeyboardAvoidingWrapper } from '../../../components/common';
 import { useAuth } from '../../../state/AuthContext';
 import { useLanguage } from '../../../localization/LanguageContext';
 import { Lock, Mail } from 'lucide-react-native';
@@ -70,61 +67,53 @@ export const LoginScreen: React.FC = () => {
         onBackPress={() => navigation.goBack()}
       />
 
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.brandHeader}>
-            <Logo size={72} style={{ marginBottom: spacing.md, alignSelf: 'center' }} />
-            <Text style={styles.brandTitle}>D&G</Text>
-            <Text style={styles.brandSubtitle}>{t.signInSubtitle}</Text>
+      <KeyboardAvoidingWrapper contentContainerStyle={styles.scrollContent}>
+        <View style={styles.brandHeader}>
+          <Logo size={72} style={{ marginBottom: spacing.md, alignSelf: 'center' }} />
+          <Text style={styles.brandTitle}>D&G</Text>
+          <Text style={styles.brandSubtitle}>{t.signInSubtitle}</Text>
+        </View>
+
+        <View style={styles.formCard}>
+          <Input
+            label={t.emailAddress}
+            placeholder="name@example.com"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              if (emailError) setEmailError('');
+            }}
+            error={emailError}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            leftIcon={<Mail size={18} color={colors.textSecondary} />}
+          />
+
+          <Input
+            label={t.password}
+            placeholder="••••••••"
+            value={password}
+            onChangeText={setPassword}
+            isPassword
+            leftIcon={<Lock size={18} color={colors.textSecondary} />}
+          />
+
+          <Button
+            title={t.signIn}
+            onPress={handleLogin}
+            isLoading={isLoading}
+            style={styles.loginBtn}
+          />
+
+          <View style={styles.registerPrompt}>
+            <Text style={styles.promptText}>{t.noAccount} </Text>
+            <TouchableOpacity onPress={() => navigation.replace('Register')}>
+              <Text style={styles.registerLink}>{t.register}</Text>
+            </TouchableOpacity>
           </View>
-
-          <View style={styles.formCard}>
-            <Input
-              label={t.emailAddress}
-              placeholder="name@example.com"
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                if (emailError) setEmailError('');
-              }}
-              error={emailError}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              leftIcon={<Mail size={18} color={colors.textSecondary} />}
-            />
-
-            <Input
-              label={t.password}
-              placeholder="••••••••"
-              value={password}
-              onChangeText={setPassword}
-              isPassword
-              leftIcon={<Lock size={18} color={colors.textSecondary} />}
-            />
-
-            <Button
-              title={t.signIn}
-              onPress={handleLogin}
-              isLoading={isLoading}
-              style={styles.loginBtn}
-            />
-
-            <View style={styles.registerPrompt}>
-              <Text style={styles.promptText}>{t.noAccount} </Text>
-              <TouchableOpacity onPress={() => navigation.replace('Register')}>
-                <Text style={styles.registerLink}>{t.register}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </KeyboardAvoidingWrapper>
     </View>
   );
 };
@@ -138,7 +127,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     padding: spacing.lg,
+    paddingBottom: spacing.xxl + 80,
   },
   brandHeader: {
     alignItems: 'center',

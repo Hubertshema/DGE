@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius } from '../../../theme';
-import { Header, Button, Input } from '../../../components/common';
+import { Header, Button, Input, KeyboardAvoidingWrapper } from '../../../components/common';
 import { useCart } from '../../../state/CartContext';
 import { useAuth } from '../../../state/AuthContext';
 import { ShieldCheck, MapPin } from 'lucide-react-native';
@@ -95,7 +94,7 @@ export const CheckoutScreen: React.FC = () => {
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingWrapper contentContainerStyle={styles.scrollContent}>
         {/* Delivery Address Section */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -175,16 +174,16 @@ export const CheckoutScreen: React.FC = () => {
             Payment is arranged via WhatsApp directly with D&G upon placement.
           </Text>
         </View>
-      </ScrollView>
 
-      {/* Place Order Button */}
-      <View style={[styles.footer, { paddingBottom: insets.bottom || spacing.md }]}>
-        <Button
-          title={isSubmitting ? 'Saving Order to Neon...' : 'Confirm & Place Order'}
-          onPress={handlePlaceOrder}
-          isLoading={isSubmitting}
-        />
-      </View>
+        {/* Place Order Action */}
+        <View style={styles.actionContainer}>
+          <Button
+            title={isSubmitting ? 'Saving Order to Neon...' : 'Confirm & Place Order'}
+            onPress={handlePlaceOrder}
+            isLoading={isSubmitting}
+          />
+        </View>
+      </KeyboardAvoidingWrapper>
     </View>
   );
 };
@@ -267,10 +266,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginLeft: spacing.sm,
   },
-  footer: {
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    padding: spacing.lg,
+  actionContainer: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.xl,
   },
 });

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Alert,
   TouchableOpacity,
   StatusBar,
@@ -14,7 +13,7 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius } from '../../../theme';
-import { Header, Input, Button, LoadingSpinner } from '../../../components/common';
+import { Header, Input, Button, LoadingSpinner, KeyboardAvoidingWrapper } from '../../../components/common';
 import { useAuth } from '../../../state/AuthContext';
 import { useLanguage } from '../../../localization/LanguageContext';
 import { api } from '../../../api/client';
@@ -195,7 +194,7 @@ export const SellerProductEditScreen: React.FC = () => {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingWrapper contentContainerStyle={styles.scrollContent}>
         <Input
           label={`${t.productName} *`}
           placeholder="e.g. Kitenge Tailored Shirt"
@@ -363,7 +362,7 @@ export const SellerProductEditScreen: React.FC = () => {
             style={styles.deleteBtn}
           />
         ) : null}
-      </ScrollView>
+      </KeyboardAvoidingWrapper>
     </View>
   );
 };

@@ -10,6 +10,8 @@ import {
   Alert,
   RefreshControl,
   StatusBar,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -220,7 +222,10 @@ export const AdminCategoriesScreen: React.FC = () => {
 
       {/* Add / Edit Category Modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
           <View style={styles.modalBox}>
             <View style={styles.modalHeader}>
               <FolderPlus size={24} color={colors.primary} />
@@ -264,7 +269,7 @@ export const AdminCategoriesScreen: React.FC = () => {
               />
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
