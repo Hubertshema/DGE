@@ -1,13 +1,11 @@
-import React, { useEffect, useState, forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
-  Keyboard,
   StyleSheet,
   ViewStyle,
   ScrollViewProps,
-  KeyboardEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing } from '../../theme';
@@ -15,9 +13,8 @@ import { spacing } from '../../theme';
 export interface KeyboardAvoidingWrapperProps extends ScrollViewProps {
   children: React.ReactNode;
   contentContainerStyle?: ViewStyle | ViewStyle[];
-  extraBottomOffset?: number;
   keyboardVerticalOffset?: number;
-  useDynamicAndroidPadding?: boolean;
+  extraBottomOffset?: number;
 }
 
 export const KeyboardAvoidingWrapper = forwardRef<any, KeyboardAvoidingWrapperProps>(
@@ -25,54 +22,25 @@ export const KeyboardAvoidingWrapper = forwardRef<any, KeyboardAvoidingWrapperPr
     {
       children,
       contentContainerStyle,
-      extraBottomOffset = 40,
       keyboardVerticalOffset,
-      useDynamicAndroidPadding = true,
+      extraBottomOffset = spacing.lg,
       ...scrollViewProps
     },
     ref
   ) => {
     const insets = useSafeAreaInsets();
-    const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
 
-    useEffect(() => {
-      const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-      const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-
-      const showSubscription = Keyboard.addListener(
-        showEvent,
-        (event: KeyboardEvent) => {
-          setKeyboardHeight(event.endCoordinates.height);
-        }
-      );
-
-      const hideSubscription = Keyboard.addListener(
-        hideEvent,
-        () => {
-          setKeyboardHeight(0);
-        }
-      );
-
-      return () => {
-        showSubscription.remove();
-        hideSubscription.remove();
-      };
-    }, []);
-
-    // Calculate vertical offset for iOS (accounting for safe area and header)
+    // On iOS, the header height (56dp) + safe area top inset must be offset.
+    // On Android, windowSoftInputMode="adjustResize" resizes the window natively,
+    // so behavior=undefined is used to let Android resize smoothly without jumping.
     const resolvedVerticalOffset =
       keyboardVerticalOffset !== undefined
         ? keyboardVerticalOffset
         : Platform.OS === 'ios'
-        ? insets.top + 10
+        ? insets.top + 56
         : 0;
 
-    // On Android, dynamic bottom padding guarantees that any field and button
-    // can be scrolled all the way above the active soft keyboard.
-    const dynamicBottomPadding =
-      Platform.OS === 'android' && useDynamicAndroidPadding && keyboardHeight > 0
-        ? keyboardHeight + extraBottomOffset
-        : spacing.xxl;
+    const safeBottomPadding = (insets.bottom || spacing.md) + extraBottomOffset;
 
     return (
       <KeyboardAvoidingView
@@ -83,13 +51,13 @@ export const KeyboardAvoidingWrapper = forwardRef<any, KeyboardAvoidingWrapperPr
         <ScrollView
           ref={ref}
           keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
           showsVerticalScrollIndicator={false}
           {...scrollViewProps}
           contentContainerStyle={[
             styles.defaultContent,
             contentContainerStyle,
-            { paddingBottom: dynamicBottomPadding },
+            { paddingBottom: safeBottomPadding },
           ]}
         >
           {children}

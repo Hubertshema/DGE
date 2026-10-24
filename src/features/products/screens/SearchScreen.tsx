@@ -74,6 +74,8 @@ export const SearchScreen: React.FC = () => {
           data={results}
           keyExtractor={(item) => item.id}
           numColumns={gridColumns}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           columnWrapperStyle={[styles.columnWrapper, { gap: spacing.md }]}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (

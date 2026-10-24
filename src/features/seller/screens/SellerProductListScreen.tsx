@@ -249,6 +249,8 @@ export const SellerProductListScreen: React.FC = () => {
         <FlatList
           data={filteredProducts}
           keyExtractor={(item) => item.id}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl

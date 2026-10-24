@@ -10,6 +10,7 @@ import {
   Alert,
   RefreshControl,
   StatusBar,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -227,47 +228,53 @@ export const AdminCategoriesScreen: React.FC = () => {
           style={styles.modalOverlay}
         >
           <View style={styles.modalBox}>
-            <View style={styles.modalHeader}>
-              <FolderPlus size={24} color={colors.primary} />
-              <Text style={styles.modalTitle}>
-                {editingId ? 'Edit Category' : 'Add New Category'}
-              </Text>
-            </View>
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.modalScrollContent}
+            >
+              <View style={styles.modalHeader}>
+                <FolderPlus size={24} color={colors.primary} />
+                <Text style={styles.modalTitle}>
+                  {editingId ? 'Edit Category' : 'Add New Category'}
+                </Text>
+              </View>
 
-            <Text style={styles.inputLabel}>Category Name *</Text>
-            <TextInput
-              style={styles.textInput}
-              placeholder="e.g. Household equipment"
-              placeholderTextColor={colors.textMuted}
-              value={catName}
-              onChangeText={setCatName}
-            />
-
-            <Text style={styles.inputLabel}>Description</Text>
-            <TextInput
-              style={[styles.textInput, styles.textArea]}
-              placeholder="Brief description of products in this department"
-              placeholderTextColor={colors.textMuted}
-              value={catDesc}
-              onChangeText={setCatDesc}
-              multiline
-              numberOfLines={3}
-            />
-
-            <View style={styles.modalActions}>
-              <Button
-                title="Cancel"
-                variant="outline"
-                onPress={() => setModalVisible(false)}
-                style={{ flex: 1, marginRight: spacing.sm }}
+              <Text style={styles.inputLabel}>Category Name *</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="e.g. Household equipment"
+                placeholderTextColor={colors.textMuted}
+                value={catName}
+                onChangeText={setCatName}
               />
-              <Button
-                title="Save Category"
-                onPress={handleSave}
-                isLoading={isSaving}
-                style={{ flex: 1 }}
+
+              <Text style={styles.inputLabel}>Description</Text>
+              <TextInput
+                style={[styles.textInput, styles.textArea]}
+                placeholder="Brief description of products in this department"
+                placeholderTextColor={colors.textMuted}
+                value={catDesc}
+                onChangeText={setCatDesc}
+                multiline
+                numberOfLines={3}
               />
-            </View>
+
+              <View style={styles.modalActions}>
+                <Button
+                  title="Cancel"
+                  variant="outline"
+                  onPress={() => setModalVisible(false)}
+                  style={{ flex: 1, marginRight: spacing.sm }}
+                />
+                <Button
+                  title="Save Category"
+                  onPress={handleSave}
+                  isLoading={isSaving}
+                  style={{ flex: 1 }}
+                />
+              </View>
+            </ScrollView>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -377,8 +384,12 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     maxWidth: 520,
+    maxHeight: '90%',
     width: '100%',
     alignSelf: 'center',
+  },
+  modalScrollContent: {
+    flexGrow: 1,
   },
   modalHeader: {
     flexDirection: 'row',
