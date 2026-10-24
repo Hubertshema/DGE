@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { colors, spacing, borderRadius, useResponsive } from '../../../theme';
 import { CATEGORIES } from '../../../constants/categories';
 import { Product } from '../../../types';
 import { ProductCard } from '../components/ProductCard';
@@ -34,6 +34,7 @@ export const HomeScreen: React.FC = () => {
   const { itemCount, addToCart } = useCart();
   const { currentLanguage, setLanguage, t } = useLanguage();
   const { unreadCount } = useNotifications();
+  const { gridColumns, getCardWidth, isLandscape } = useResponsive();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
@@ -195,10 +196,11 @@ export const HomeScreen: React.FC = () => {
         </View>
       ) : (
         <FlatList
+          key={`home-grid-${gridColumns}-${isLandscape ? 'land' : 'port'}`}
           data={products}
           keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.columnWrapper}
+          numColumns={gridColumns}
+          columnWrapperStyle={[styles.columnWrapper, { gap: spacing.md }]}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -210,6 +212,7 @@ export const HomeScreen: React.FC = () => {
           renderItem={({ item }) => (
             <ProductCard
               product={item}
+              cardWidth={getCardWidth(gridColumns)}
               onPress={() =>
                 navigation.navigate('ProductDetails', {
                   productId: item.id,
@@ -376,7 +379,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   emptyContainer: {
     flex: 1,

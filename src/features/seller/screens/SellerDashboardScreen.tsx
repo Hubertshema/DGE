@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing, borderRadius, shadows } from '../../../theme';
+import { colors, spacing, borderRadius, shadows, useResponsive } from '../../../theme';
 import { Header, SyncIndicator } from '../../../components/common';
 import { useAuth } from '../../../state/AuthContext';
 import { useLanguage } from '../../../localization/LanguageContext';
@@ -45,6 +45,8 @@ export const SellerDashboardScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { isAdmin, isSeller, token, user, logout } = useAuth();
   const { t, currentLanguage } = useLanguage();
+  const { isLandscape, isTablet } = useResponsive();
+  const isWide = isLandscape || isTablet;
 
   const {
     data: metricData,
@@ -139,84 +141,86 @@ export const SellerDashboardScreen: React.FC = () => {
 
         {/* Section: Key Financial & Order Metrics */}
         <Text style={styles.sectionHeading}>Business Performance</Text>
-        <View style={styles.metricsGrid}>
-          {/* Revenue Card */}
-          <TouchableOpacity
-            style={[styles.metricCard, styles.revenueCard]}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('AdminReports')}
-          >
-            <View style={styles.metricCardTop}>
-              <Text style={styles.metricLabel}>{t.totalRevenue}</Text>
-              <ArrowUpRight size={16} color={colors.primary} />
-            </View>
-            <Text style={styles.revenueVal}>
-              {metrics.totalRevenueRwf.toLocaleString()} RWF
-            </Text>
-            <Text style={styles.metricSub}>Verified paid receipts</Text>
-          </TouchableOpacity>
-
-          {/* Pending Fulfillment Card */}
-          <TouchableOpacity
-            style={styles.metricCard}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('SellerOrders')}
-          >
-            <View style={styles.metricCardTop}>
-              <Text style={styles.metricLabel}>{t.pending_confirmation}</Text>
-              <ClipboardList size={16} color={colors.primary} />
-            </View>
-            <Text style={styles.metricVal}>{metrics.pendingOrders}</Text>
-            <Text style={styles.metricSub}>Requires dispatch</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.metricsGrid}>
-          {/* WhatsApp Payment Verification Card */}
-          <TouchableOpacity
-            style={[
-              styles.metricCard,
-              metrics.awaitingPayment > 0 && styles.warningCard,
-            ]}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('SellerOrders')}
-          >
-            <View style={styles.metricCardTop}>
-              <Text style={styles.metricLabel}>{t.awaiting_payment}</Text>
-              <CheckCircle
-                size={16}
-                color={metrics.awaitingPayment > 0 ? colors.warning : colors.textSecondary}
-              />
-            </View>
-            <Text
-              style={[
-                styles.metricVal,
-                metrics.awaitingPayment > 0 && { color: colors.warning },
-              ]}
+        <View style={[styles.metricsContainer, isWide && styles.metricsContainerWide]}>
+          <View style={[styles.metricsGrid, isWide && styles.metricsGridWide]}>
+            {/* Revenue Card */}
+            <TouchableOpacity
+              style={[styles.metricCard, styles.revenueCard]}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('AdminReports')}
             >
-              {metrics.awaitingPayment}
-            </Text>
-            <Text style={styles.metricSub}>WhatsApp MoMo verify</Text>
-          </TouchableOpacity>
+              <View style={styles.metricCardTop}>
+                <Text style={styles.metricLabel}>{t.totalRevenue}</Text>
+                <ArrowUpRight size={16} color={colors.primary} />
+              </View>
+              <Text style={styles.revenueVal}>
+                {metrics.totalRevenueRwf.toLocaleString()} RWF
+              </Text>
+              <Text style={styles.metricSub}>Verified paid receipts</Text>
+            </TouchableOpacity>
 
-          {/* Total Orders Card */}
-          <TouchableOpacity
-            style={styles.metricCard}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('SellerOrders')}
-          >
-            <View style={styles.metricCardTop}>
-              <Text style={styles.metricLabel}>{t.totalOrdersCount}</Text>
-              <TrendingUp size={16} color={colors.textSecondary} />
-            </View>
-            <Text style={styles.metricVal}>{metrics.totalOrders}</Text>
-            <Text style={styles.metricSub}>Total orders placed</Text>
-          </TouchableOpacity>
+            {/* Pending Fulfillment Card */}
+            <TouchableOpacity
+              style={styles.metricCard}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('SellerOrders')}
+            >
+              <View style={styles.metricCardTop}>
+                <Text style={styles.metricLabel}>{t.pending_confirmation}</Text>
+                <ClipboardList size={16} color={colors.primary} />
+              </View>
+              <Text style={styles.metricVal}>{metrics.pendingOrders}</Text>
+              <Text style={styles.metricSub}>Requires dispatch</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.metricsGrid, isWide && styles.metricsGridWide]}>
+            {/* WhatsApp Payment Verification Card */}
+            <TouchableOpacity
+              style={[
+                styles.metricCard,
+                metrics.awaitingPayment > 0 && styles.warningCard,
+              ]}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('SellerOrders')}
+            >
+              <View style={styles.metricCardTop}>
+                <Text style={styles.metricLabel}>{t.awaiting_payment}</Text>
+                <CheckCircle
+                  size={16}
+                  color={metrics.awaitingPayment > 0 ? colors.warning : colors.textSecondary}
+                />
+              </View>
+              <Text
+                style={[
+                  styles.metricVal,
+                  metrics.awaitingPayment > 0 && { color: colors.warning },
+                ]}
+              >
+                {metrics.awaitingPayment}
+              </Text>
+              <Text style={styles.metricSub}>WhatsApp MoMo verify</Text>
+            </TouchableOpacity>
+
+            {/* Total Orders Card */}
+            <TouchableOpacity
+              style={styles.metricCard}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('SellerOrders')}
+            >
+              <View style={styles.metricCardTop}>
+                <Text style={styles.metricLabel}>{t.totalOrdersCount}</Text>
+                <TrendingUp size={16} color={colors.textSecondary} />
+              </View>
+              <Text style={styles.metricVal}>{metrics.totalOrders}</Text>
+              <Text style={styles.metricSub}>Total orders placed</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Section: Operational Hub (Categories & Customers) */}
         <Text style={styles.sectionHeading}>Store Management Hub</Text>
-        <View style={styles.hubGrid}>
+        <View style={[styles.hubGrid, isWide && styles.hubGridWide]}>
           {/* Categories Card */}
           <TouchableOpacity
             style={styles.hubCard}
@@ -366,6 +370,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.md,
     paddingBottom: 95, // Space for the fixed bottom navigation bar
+    maxWidth: 860,
+    width: '100%',
+    alignSelf: 'center',
   },
   protectedNotice: {
     backgroundColor: colors.warningLight,
@@ -434,10 +441,20 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     marginTop: spacing.sm,
   },
+  metricsContainer: {},
+  metricsContainerWide: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
   metricsGrid: {
     flexDirection: 'row',
     gap: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  metricsGridWide: {
+    flex: 1,
+    marginBottom: 0,
   },
   metricCard: {
     flex: 1,
@@ -485,7 +502,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginBottom: spacing.xs,
   },
+  hubGridWide: {
+    flexDirection: 'row',
+  },
   hubCard: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.white,

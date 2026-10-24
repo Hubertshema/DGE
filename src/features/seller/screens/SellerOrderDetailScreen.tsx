@@ -337,6 +337,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+    maxWidth: 780,
+    width: '100%',
+    alignSelf: 'center',
   },
   card: {
     backgroundColor: colors.white,

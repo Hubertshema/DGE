@@ -218,6 +218,9 @@ const styles = StyleSheet.create({
   listContent: {
     padding: spacing.md,
     flexGrow: 1,
+    maxWidth: 720,
+    width: '100%',
+    alignSelf: 'center',
   },
   loadingContainer: {
     flex: 1,

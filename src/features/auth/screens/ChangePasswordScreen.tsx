@@ -161,6 +161,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
   },
   brandHeader: {
     alignItems: 'center',

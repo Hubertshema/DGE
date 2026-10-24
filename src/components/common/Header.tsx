@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, borderRadius } from '../../theme';
+import { colors, spacing, borderRadius, useResponsive } from '../../theme';
 import { ArrowLeft, Search, ShoppingBag, Globe, Bell } from 'lucide-react-native';
 import { Logo } from './Logo';
 import { useCart } from '../../state/CartContext';
@@ -35,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { itemCount } = useCart();
   const { currentLanguage, setLanguage } = useLanguage();
   const { unreadCount } = useNotifications();
+  const { isSmallPhone } = useResponsive();
 
   const renderBell = () => (
     <TouchableOpacity
@@ -55,7 +56,13 @@ export const Header: React.FC<HeaderProps> = ({
   );
 
   return (
-    <View style={[styles.container, style]}>
+    <View
+      style={[
+        styles.container,
+        { paddingHorizontal: isSmallPhone ? spacing.sm : spacing.md },
+        style,
+      ]}
+    >
       <View style={styles.leftContainer}>
         {showBack ? (
           <TouchableOpacity

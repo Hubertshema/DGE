@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { colors, spacing, borderRadius, useResponsive } from '../../../theme';
 import { Input, EmptyState, ProductListSkeleton } from '../../../components/common';
 import { Search, X } from 'lucide-react-native';
 import { Product } from '../../../types';
@@ -20,6 +20,7 @@ export const SearchScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { addToCart } = useCart();
   const { t } = useLanguage();
+  const { gridColumns, getCardWidth, isLandscape } = useResponsive();
 
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -69,14 +70,16 @@ export const SearchScreen: React.FC = () => {
         <ProductListSkeleton count={4} />
       ) : (
         <FlatList
+          key={`search-grid-${gridColumns}-${isLandscape ? 'land' : 'port'}`}
           data={results}
           keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.columnWrapper}
+          numColumns={gridColumns}
+          columnWrapperStyle={[styles.columnWrapper, { gap: spacing.md }]}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <ProductCard
               product={item}
+              cardWidth={getCardWidth(gridColumns)}
               onPress={() =>
                 navigation.navigate('ProductDetails', {
                   productId: item.id,
@@ -123,6 +126,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
 });

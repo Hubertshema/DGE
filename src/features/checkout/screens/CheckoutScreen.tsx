@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { colors, spacing, borderRadius, useResponsive } from '../../../theme';
 import { Header, Button, Input, KeyboardAvoidingWrapper } from '../../../components/common';
 import { useCart } from '../../../state/CartContext';
 import { useAuth } from '../../../state/AuthContext';
@@ -85,6 +85,8 @@ export const CheckoutScreen: React.FC = () => {
     }
   };
 
+  const { isLandscape } = useResponsive();
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <Header
@@ -95,93 +97,97 @@ export const CheckoutScreen: React.FC = () => {
       />
 
       <KeyboardAvoidingWrapper contentContainerStyle={styles.scrollContent}>
-        {/* Delivery Address Section */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <MapPin size={20} color={colors.primary} />
-            <Text style={styles.cardTitle}>Delivery Address (Rwanda)</Text>
+        <View style={[styles.contentWrapper, isLandscape ? styles.landscapeLayout : undefined]}>
+          {/* Delivery Address Section */}
+          <View style={[styles.card, isLandscape ? styles.landscapeColLeft : undefined]}>
+            <View style={styles.cardHeader}>
+              <MapPin size={20} color={colors.primary} />
+              <Text style={styles.cardTitle}>Delivery Address (Rwanda)</Text>
+            </View>
+
+            <Input
+              label="Recipient Full Name"
+              placeholder="e.g. Mugisha Jean"
+              value={fullName}
+              onChangeText={setFullName}
+            />
+
+            <Input
+              label="Phone Number (for delivery & WhatsApp)"
+              placeholder="e.g. 0788 123 456"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+            />
+
+            <View style={styles.row}>
+              <View style={styles.halfCol}>
+                <Input
+                  label="District"
+                  placeholder="District"
+                  value={district}
+                  onChangeText={setDistrict}
+                />
+              </View>
+              <View style={styles.halfCol}>
+                <Input
+                  label="Sector"
+                  placeholder="Sector"
+                  value={sector}
+                  onChangeText={setSector}
+                />
+              </View>
+            </View>
+
+            <Input
+              label="Street / Landmark / House No."
+              placeholder="e.g. Near Rwamagana Market, House 12"
+              value={streetDetails}
+              onChangeText={setStreetDetails}
+            />
           </View>
 
-          <Input
-            label="Recipient Full Name"
-            placeholder="e.g. Mugisha Jean"
-            value={fullName}
-            onChangeText={setFullName}
-          />
+          {/* Order Summary & Actions */}
+          <View style={[styles.summaryCol, isLandscape ? styles.landscapeColRight : undefined]}>
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Order Summary</Text>
 
-          <Input
-            label="Phone Number (for delivery & WhatsApp)"
-            placeholder="e.g. 0788 123 456"
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
-          />
+              <View style={styles.summaryLine}>
+                <Text style={styles.summaryLabel}>Items Subtotal ({items.length})</Text>
+                <Text style={styles.summaryVal}>RWF {subtotal.toLocaleString()}</Text>
+              </View>
 
-          <View style={styles.row}>
-            <View style={styles.halfCol}>
-              <Input
-                label="District"
-                placeholder="District"
-                value={district}
-                onChangeText={setDistrict}
+              <View style={styles.summaryLine}>
+                <Text style={styles.summaryLabel}>Standard Delivery (Rwamagana)</Text>
+                <Text style={styles.summaryVal}>RWF {estimatedDeliveryFee.toLocaleString()}</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.summaryLine}>
+                <Text style={styles.totalLabel}>Estimated Total</Text>
+                <Text style={styles.totalVal}>RWF {estimatedTotal.toLocaleString()}</Text>
+              </View>
+            </View>
+
+            {/* Payment Policy Notice */}
+            <View style={styles.noticeCard}>
+              <ShieldCheck size={20} color={colors.primary} />
+              <Text style={styles.noticeText}>
+                Prices and stock are verified authoritatively by Neon PostgreSQL during order creation.
+                Payment is arranged via WhatsApp directly with D&G upon placement.
+              </Text>
+            </View>
+
+            {/* Place Order Action */}
+            <View style={styles.actionContainer}>
+              <Button
+                title={isSubmitting ? 'Saving Order to Neon...' : 'Confirm & Place Order'}
+                onPress={handlePlaceOrder}
+                isLoading={isSubmitting}
               />
             </View>
-            <View style={styles.halfCol}>
-              <Input
-                label="Sector"
-                placeholder="Sector"
-                value={sector}
-                onChangeText={setSector}
-              />
-            </View>
           </View>
-
-          <Input
-            label="Street / Landmark / House No."
-            placeholder="e.g. Near Rwamagana Market, House 12"
-            value={streetDetails}
-            onChangeText={setStreetDetails}
-          />
-        </View>
-
-        {/* Order Summary */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Order Summary</Text>
-
-          <View style={styles.summaryLine}>
-            <Text style={styles.summaryLabel}>Items Subtotal ({items.length})</Text>
-            <Text style={styles.summaryVal}>RWF {subtotal.toLocaleString()}</Text>
-          </View>
-
-          <View style={styles.summaryLine}>
-            <Text style={styles.summaryLabel}>Standard Delivery (Rwamagana)</Text>
-            <Text style={styles.summaryVal}>RWF {estimatedDeliveryFee.toLocaleString()}</Text>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.summaryLine}>
-            <Text style={styles.totalLabel}>Estimated Total</Text>
-            <Text style={styles.totalVal}>RWF {estimatedTotal.toLocaleString()}</Text>
-          </View>
-        </View>
-
-        {/* Payment Policy Notice */}
-        <View style={styles.noticeCard}>
-          <ShieldCheck size={20} color={colors.primary} />
-          <Text style={styles.noticeText}>
-            Prices and stock are verified authoritatively by Neon PostgreSQL during order creation.
-            Payment is arranged via WhatsApp directly with D&G upon placement.
-          </Text>
-        </View>
-
-        {/* Place Order Action */}
-        <View style={styles.actionContainer}>
-          <Button
-            title={isSubmitting ? 'Saving Order to Neon...' : 'Confirm & Place Order'}
-            onPress={handlePlaceOrder}
-            isLoading={isSubmitting}
-          />
         </View>
       </KeyboardAvoidingWrapper>
     </View>
@@ -195,6 +201,26 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.md,
+  },
+  contentWrapper: {
+    maxWidth: 800,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  landscapeLayout: {
+    flexDirection: 'row',
+    gap: spacing.lg,
+    alignItems: 'flex-start',
+  },
+  landscapeColLeft: {
+    flex: 1.2,
+    marginBottom: 0,
+  },
+  landscapeColRight: {
+    flex: 1,
+  },
+  summaryCol: {
+    width: '100%',
   },
   card: {
     backgroundColor: colors.white,

@@ -338,12 +338,18 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
+    maxWidth: 720,
+    width: '100%',
+    alignSelf: 'center',
   },
   guestContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.xl,
+    maxWidth: 480,
+    width: '100%',
+    alignSelf: 'center',
   },
   guestTitle: {
     fontSize: 18,

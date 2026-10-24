@@ -1,23 +1,24 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Product } from '../../../types';
 import { colors, spacing, borderRadius, shadows } from '../../../theme';
 import { CachedImage } from '../../../components/common';
 import { ShoppingBag } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - spacing.lg * 2 - spacing.md) / 2;
-
 export interface ProductCardProps {
   product: Product;
   onPress: () => void;
   onAddToCart?: () => void;
+  cardWidth?: number;
+  style?: ViewStyle;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onPress,
   onAddToCart,
+  cardWidth,
+  style,
 }) => {
   const primaryImage = product.images?.[0];
 
@@ -25,7 +26,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     <TouchableOpacity
       activeOpacity={0.88}
       onPress={onPress}
-      style={styles.container}
+      style={[
+        styles.container,
+        cardWidth ? { width: cardWidth } : { flex: 1 },
+        style,
+      ]}
     >
       <View style={styles.imageContainer}>
         <CachedImage
@@ -76,7 +81,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: CARD_WIDTH,
     backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,
@@ -87,7 +91,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 150,
+    aspectRatio: 1.05,
     backgroundColor: colors.background,
     position: 'relative',
   },

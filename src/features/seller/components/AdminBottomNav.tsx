@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { colors, spacing, borderRadius, useResponsive } from '../../../theme';
 import {
   LayoutDashboard,
   Package,
@@ -34,6 +34,7 @@ export const AdminBottomNav: React.FC<AdminBottomNavProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
+  const { isLandscape } = useResponsive();
 
   const handleTabPress = (tab: AdminTabType) => {
     if (tab === activeTab && tab !== 'add') return;
@@ -57,10 +58,20 @@ export const AdminBottomNav: React.FC<AdminBottomNavProps> = ({
     }
   };
 
-  const bottomPadding = Math.max(insets.bottom, Platform.OS === 'ios' ? 14 : 8);
+  const bottomPadding = isLandscape
+    ? Math.max(insets.bottom, 4)
+    : Math.max(insets.bottom, Platform.OS === 'ios' ? 14 : 8);
 
   return (
-    <View style={[styles.container, { paddingBottom: bottomPadding }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingBottom: bottomPadding,
+          paddingTop: isLandscape ? 2 : 6,
+        },
+      ]}
+    >
       {/* 1. Overview Tab */}
       <TouchableOpacity
         style={styles.tabItem}

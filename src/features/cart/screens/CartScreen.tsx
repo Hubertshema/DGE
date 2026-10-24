@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { colors, spacing, borderRadius, useResponsive } from '../../../theme';
 import { Header, Button, EmptyState, CachedImage } from '../../../components/common';
 import { useCart } from '../../../state/CartContext';
 import { useLanguage } from '../../../localization/LanguageContext';
@@ -24,6 +24,7 @@ export const CartScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { items, subtotal, updateQuantity, removeFromCart } = useCart();
   const { t } = useLanguage();
+  const { isLandscape } = useResponsive();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -37,8 +38,85 @@ export const CartScreen: React.FC = () => {
           actionTitle={t.startShopping}
           onAction={() => navigation.navigate('MainTabs', { screen: 'HomeTab' } as any)}
         />
+      ) : isLandscape ? (
+        <View style={styles.landscapeContainer}>
+          <View style={styles.landscapeListCol}>
+            <FlatList
+              data={items}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.listContent}
+              renderItem={({ item }) => (
+                <View style={styles.cartItem}>
+                  <CachedImage
+                    uri={item.product.images?.[0]}
+                    style={styles.productImage}
+                    resizeMode="cover"
+                    fallbackText="D&G"
+                  />
+                  <View style={styles.itemInfo}>
+                    <Text style={styles.itemCategory}>{item.product.category}</Text>
+                    <Text style={styles.itemName} numberOfLines={2}>
+                      {item.product.name}
+                    </Text>
+                    {item.selectedVariation ? (
+                      <Text style={styles.variationText}>
+                        {item.selectedVariation.name}: {item.selectedVariation.value}
+                      </Text>
+                    ) : null}
+                    <Text style={styles.itemPrice}>
+                      RWF {item.product.price.toLocaleString()}
+                    </Text>
+                  </View>
+
+                  <View style={styles.actionsColumn}>
+                    <TouchableOpacity
+                      onPress={() => removeFromCart(item.id)}
+                      style={styles.deleteButton}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Trash2 size={18} color={colors.danger} />
+                    </TouchableOpacity>
+
+                    <View style={styles.quantityControl}>
+                      <TouchableOpacity
+                        onPress={() => updateQuantity(item.id, item.quantity - 1)}
+                        style={styles.qtyBtn}
+                      >
+                        <Minus size={14} color={colors.textPrimary} />
+                      </TouchableOpacity>
+                      <Text style={styles.qtyText}>{item.quantity}</Text>
+                      <TouchableOpacity
+                        onPress={() => updateQuantity(item.id, item.quantity + 1)}
+                        style={styles.qtyBtn}
+                      >
+                        <Plus size={14} color={colors.textPrimary} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              )}
+            />
+          </View>
+
+          <View style={[styles.landscapeSummaryCol, { paddingBottom: insets.bottom || spacing.md }]}>
+            <View style={styles.summaryCard}>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>{t.subtotal}</Text>
+                <Text style={styles.summaryValue}>RWF {subtotal.toLocaleString()}</Text>
+              </View>
+              <Text style={styles.serverNote}>
+                * Delivery fee and exact total will be verified by the server at checkout.
+              </Text>
+              <Button
+                title={t.checkoutBtn}
+                onPress={() => navigation.navigate('Checkout')}
+                style={styles.checkoutBtn}
+              />
+            </View>
+          </View>
+        </View>
       ) : (
-        <>
+        <View style={styles.portraitWrapper}>
           <FlatList
             data={items}
             keyExtractor={(item) => item.id}
@@ -110,7 +188,7 @@ export const CartScreen: React.FC = () => {
               style={styles.checkoutBtn}
             />
           </View>
-        </>
+        </View>
       )}
     </View>
   );
@@ -218,6 +296,32 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.textSecondary,
     marginBottom: spacing.md,
+  },
+  portraitWrapper: {
+    flex: 1,
+    maxWidth: 760,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  landscapeContainer: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  landscapeListCol: {
+    flex: 1.2,
+  },
+  landscapeSummaryCol: {
+    width: 320,
+    maxWidth: '45%',
+    padding: spacing.md,
+    justifyContent: 'center',
+  },
+  summaryCard: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
   },
   checkoutBtn: {
     marginTop: spacing.xs,

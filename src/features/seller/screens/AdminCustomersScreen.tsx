@@ -138,6 +138,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.md,
+    maxWidth: 780,
+    width: '100%',
+    alignSelf: 'center',
   },
   customerCard: {
     backgroundColor: colors.white,

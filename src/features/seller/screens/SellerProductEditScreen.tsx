@@ -375,6 +375,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
+    maxWidth: 720,
+    width: '100%',
+    alignSelf: 'center',
   },
   deleteHeaderBtn: {
     padding: spacing.xs,

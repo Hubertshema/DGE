@@ -1,29 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  Image,
-  Dimensions,
   TouchableOpacity,
-  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing, borderRadius } from '../../../theme';
+import { colors, spacing, borderRadius, useResponsive } from '../../../theme';
 import { Header, Button, Badge, CachedImage, ProductDetailsSkeleton, SyncIndicator } from '../../../components/common';
 import { useCart } from '../../../state/CartContext';
 import { useLanguage } from '../../../localization/LanguageContext';
-import { ShoppingBag, Check, ShieldCheck, AlertCircle } from 'lucide-react-native';
+import { ShoppingBag, ShieldCheck, AlertCircle } from 'lucide-react-native';
 import { useProductQuery } from '../../../api/queries';
-import { Product } from '../../../types';
 
 type RouteProps = RouteProp<RootStackParamList, 'ProductDetails'>;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-const { width } = Dimensions.get('window');
 
 export const ProductDetailsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
@@ -32,6 +27,7 @@ export const ProductDetailsScreen: React.FC = () => {
   const { productId, productName } = route.params;
   const { addToCart } = useCart();
   const { t } = useLanguage();
+  const { width, height, isLandscape } = useResponsive();
 
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState<boolean>(false);
@@ -95,48 +91,61 @@ export const ProductDetailsScreen: React.FC = () => {
           />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Image Gallery */}
-          <View style={styles.imageGallery}>
-            <CachedImage
-              uri={primaryImage}
-              style={styles.image}
-              resizeMode="cover"
-              fallbackText="D&G"
-            />
-          </View>
-
-          {/* Product Details Card */}
-          <View style={styles.detailsCard}>
-            <Text style={styles.category}>{product?.category || 'Collection'}</Text>
-            <Text style={styles.name}>{product?.name || productName}</Text>
-
-            <View style={styles.priceRow}>
-              <Text style={styles.price}>
-                RWF {product?.price ? product.price.toLocaleString() : '--'}
-              </Text>
-              <Badge
-                label={product?.isAvailable && product.stock > 0 ? `${t.inStock} (${product.stock})` : t.outOfStock}
-                variant={product?.isAvailable && product.stock > 0 ? 'success' : 'danger'}
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            isLandscape && styles.landscapeScrollContent,
+          ]}
+        >
+          <View style={isLandscape ? styles.landscapeRow : undefined}>
+            {/* Image Gallery */}
+            <View
+              style={
+                isLandscape
+                  ? [styles.imageGalleryLandscape, { height: Math.min(height - 130, 360) }]
+                  : [styles.imageGallery, { height: Math.min(width * 0.75, 340) }]
+              }
+            >
+              <CachedImage
+                uri={primaryImage}
+                style={styles.image}
+                resizeMode="cover"
+                fallbackText="D&G"
               />
             </View>
 
-            {product?.sku ? (
-              <Text style={styles.skuText}>SKU: {product.sku}</Text>
-            ) : null}
+            {/* Product Details Card */}
+            <View style={isLandscape ? styles.detailsCardLandscape : styles.detailsCard}>
+              <Text style={styles.category}>{product?.category || 'Collection'}</Text>
+              <Text style={styles.name}>{product?.name || productName}</Text>
 
-            <View style={styles.divider} />
+              <View style={styles.priceRow}>
+                <Text style={styles.price}>
+                  RWF {product?.price ? product.price.toLocaleString() : '--'}
+                </Text>
+                <Badge
+                  label={product?.isAvailable && product.stock > 0 ? `${t.inStock} (${product.stock})` : t.outOfStock}
+                  variant={product?.isAvailable && product.stock > 0 ? 'success' : 'danger'}
+                />
+              </View>
 
-            <Text style={styles.sectionHeader}>{t.description}</Text>
-            <Text style={styles.description}>
-              {product?.description || 'Quality product verified by D&G store in Rwamagana.'}
-            </Text>
+              {product?.sku ? (
+                <Text style={styles.skuText}>SKU: {product.sku}</Text>
+              ) : null}
 
-            <View style={styles.trustBadge}>
-              <ShieldCheck size={18} color={colors.primary} />
-              <Text style={styles.trustText}>
-                Authentic product. WhatsApp payment & direct delivery in Rwanda.
+              <View style={styles.divider} />
+
+              <Text style={styles.sectionHeader}>{t.description}</Text>
+              <Text style={styles.description}>
+                {product?.description || 'Quality product verified by D&G store in Rwamagana.'}
               </Text>
+
+              <View style={styles.trustBadge}>
+                <ShieldCheck size={18} color={colors.primary} />
+                <Text style={styles.trustText}>
+                  Authentic product. WhatsApp payment & direct delivery in Rwanda.
+                </Text>
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -179,12 +188,36 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: spacing.xxl,
   },
+  landscapeScrollContent: {
+    paddingHorizontal: spacing.md,
+  },
+  landscapeRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+    paddingTop: spacing.md,
+  },
   imageGallery: {
-    width: width,
-    height: width * 0.75,
+    width: '100%',
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+  },
+  imageGalleryLandscape: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  detailsCardLandscape: {
+    flex: 1.2,
+    backgroundColor: colors.white,
+    padding: spacing.lg,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   image: {
     width: '100%',

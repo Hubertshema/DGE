@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing } from '../../../theme';
+import { colors, spacing, useResponsive } from '../../../theme';
 import { Header, EmptyState, ProductListSkeleton, SyncIndicator, Button } from '../../../components/common';
 import { ProductCard } from '../components/ProductCard';
 import { Product } from '../../../types';
@@ -30,6 +30,7 @@ export const CategoryProductsScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { addToCart } = useCart();
   const { t } = useLanguage();
+  const { gridColumns, getCardWidth, isLandscape } = useResponsive();
 
   const { category } = route.params;
 
@@ -80,10 +81,11 @@ export const CategoryProductsScreen: React.FC = () => {
         </View>
       ) : (
         <FlatList
+          key={`cat-grid-${gridColumns}-${isLandscape ? 'land' : 'port'}`}
           data={products}
           keyExtractor={(item) => item.id}
-          numColumns={2}
-          columnWrapperStyle={styles.columnWrapper}
+          numColumns={gridColumns}
+          columnWrapperStyle={[styles.columnWrapper, { gap: spacing.md }]}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -96,6 +98,7 @@ export const CategoryProductsScreen: React.FC = () => {
           renderItem={({ item }) => (
             <ProductCard
               product={item}
+              cardWidth={getCardWidth(gridColumns)}
               onPress={() =>
                 navigation.navigate('ProductDetails', {
                   productId: item.id,
@@ -128,6 +131,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
 });

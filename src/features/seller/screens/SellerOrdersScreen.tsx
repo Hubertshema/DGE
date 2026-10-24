@@ -230,6 +230,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     gap: spacing.xs,
+    maxWidth: 820,
+    width: '100%',
+    alignSelf: 'center',
   },
   filterTab: {
     paddingHorizontal: spacing.sm,
@@ -251,6 +254,9 @@ const styles = StyleSheet.create({
   listContent: {
     padding: spacing.md,
     paddingBottom: 95,
+    maxWidth: 820,
+    width: '100%',
+    alignSelf: 'center',
   },
   orderCard: {
     backgroundColor: colors.white,

@@ -129,6 +129,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.xl,
     alignItems: 'center',
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
   },
   successIconContainer: {
     marginTop: spacing.md,

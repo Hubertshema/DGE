@@ -207,6 +207,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: spacing.md,
     paddingBottom: 95,
+    maxWidth: 820,
+    width: '100%',
+    alignSelf: 'center',
   },
   revenueCard: {
     backgroundColor: colors.primary,
@@ -244,7 +247,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   gridItem: {
-    width: '48.5%',
+    flex: 1,
+    minWidth: '45%',
     backgroundColor: colors.white,
     borderRadius: borderRadius.md,
     padding: spacing.md,

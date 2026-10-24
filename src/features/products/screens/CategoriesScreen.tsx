@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { colors, spacing, borderRadius, shadows } from '../../../theme';
+import { colors, spacing, borderRadius, shadows, useResponsive } from '../../../theme';
 import { CATEGORIES } from '../../../constants/categories';
 import { Header } from '../../../components/common';
 import { useLanguage } from '../../../localization/LanguageContext';
@@ -19,8 +19,6 @@ import {
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - spacing.lg * 2 - spacing.md) / 2;
 
 const getCategoryIcon = (slug: string) => {
   const size = 32;
@@ -48,6 +46,7 @@ export const CategoriesScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { t } = useLanguage();
+  const { gridColumns, getCardWidth, isLandscape } = useResponsive();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -58,10 +57,11 @@ export const CategoriesScreen: React.FC = () => {
       />
 
       <FlatList
+        key={`categories-grid-${gridColumns}-${isLandscape ? 'land' : 'port'}`}
         data={CATEGORIES}
         keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.columnWrapper}
+        numColumns={gridColumns}
+        columnWrapperStyle={[styles.columnWrapper, { gap: spacing.md }]}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -69,7 +69,7 @@ export const CategoriesScreen: React.FC = () => {
             onPress={() =>
               navigation.navigate('CategoryProducts', { category: item.name })
             }
-            style={styles.card}
+            style={[styles.card, { width: getCardWidth(gridColumns) }]}
           >
             <View style={styles.iconCircle}>
               {getCategoryIcon(item.slug)}
@@ -94,10 +94,9 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   card: {
-    width: CARD_WIDTH,
     backgroundColor: colors.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,

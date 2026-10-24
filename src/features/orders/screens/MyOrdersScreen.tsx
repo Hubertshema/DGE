@@ -196,6 +196,9 @@ const styles = StyleSheet.create({
   listContent: {
     padding: spacing.lg,
     flexGrow: 1,
+    maxWidth: 720,
+    width: '100%',
+    alignSelf: 'center',
   },
   orderCard: {
     backgroundColor: colors.white,

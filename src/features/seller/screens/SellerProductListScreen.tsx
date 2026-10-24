@@ -415,6 +415,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     height: 42,
+    maxWidth: 820,
+    width: '100%',
+    alignSelf: 'center',
   },
   searchIcon: {
     marginRight: spacing.xs,
@@ -430,6 +433,9 @@ const styles = StyleSheet.create({
   categoriesWrapper: {
     marginTop: spacing.xs,
     marginBottom: spacing.xs,
+    maxWidth: 820,
+    width: '100%',
+    alignSelf: 'center',
   },
   categoryPillsList: {
     paddingHorizontal: spacing.md,
@@ -459,6 +465,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: 95,
     flexGrow: 1,
+    maxWidth: 820,
+    width: '100%',
+    alignSelf: 'center',
   },
   card: {
     backgroundColor: colors.white,

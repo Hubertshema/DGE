@@ -90,6 +90,9 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.lg,
+    maxWidth: 640,
+    width: '100%',
+    alignSelf: 'center',
   },
   addressCard: {
     backgroundColor: colors.white,

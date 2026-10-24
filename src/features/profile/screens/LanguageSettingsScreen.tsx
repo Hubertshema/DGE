@@ -81,6 +81,9 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
   },
   card: {
     backgroundColor: colors.white,

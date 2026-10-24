@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamList, MainTabParamList } from './types';
-import { colors, spacing } from '../theme';
+import { colors, spacing, useResponsive } from '../theme';
 import { useCart } from '../state/CartContext';
 import { useAuth } from '../state/AuthContext';
 import { useLanguage } from '../localization/LanguageContext';
@@ -54,10 +54,11 @@ const MainTabs: React.FC = () => {
   const { itemCount } = useCart();
   const { isAuthenticated } = useAuth();
   const { t, language } = useLanguage();
+  const { isLandscape } = useResponsive();
 
   return (
     <Tab.Navigator
-      key={`main-tabs-${language}`}
+      key={`main-tabs-${language}-${isLandscape ? 'land' : 'port'}`}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
@@ -66,12 +67,12 @@ const MainTabs: React.FC = () => {
           backgroundColor: colors.white,
           borderTopColor: colors.border,
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          height: isLandscape ? 48 : 60,
+          paddingBottom: isLandscape ? 3 : 8,
+          paddingTop: isLandscape ? 3 : 8,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: isLandscape ? 10 : 11,
           fontWeight: '600',
         },
       }}

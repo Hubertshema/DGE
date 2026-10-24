@@ -283,6 +283,9 @@ const styles = StyleSheet.create({
   listContent: {
     padding: spacing.md,
     flexGrow: 1,
+    maxWidth: 780,
+    width: '100%',
+    alignSelf: 'center',
   },
   addBtn: {
     backgroundColor: colors.primary,
@@ -373,6 +376,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
+    maxWidth: 520,
+    width: '100%',
+    alignSelf: 'center',
   },
   modalHeader: {
     flexDirection: 'row',
