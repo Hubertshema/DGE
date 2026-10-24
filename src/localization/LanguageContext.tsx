@@ -1,7 +1,10 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language, translations } from './translations';
 
 export type TranslationMap = typeof translations.en;
+
+const STORAGE_KEY = 'dg_user_language';
 
 interface LanguageContextType {
   language: Language;
@@ -10,11 +13,12 @@ interface LanguageContextType {
   t: TranslationMap & ((key: keyof TranslationMap) => string);
 }
 
-const defaultT = new Proxy(((key: keyof TranslationMap) => translations.en[key] || key) as any, {
-  get(_target, prop: string) {
-    return (translations.en as any)[prop] || prop;
-  },
-});
+const defaultDict = translations.en;
+const defaultFn = (key: keyof TranslationMap): string => {
+  return defaultDict[key] || (key as string);
+};
+Object.assign(defaultFn, defaultDict);
+const defaultT = defaultFn as TranslationMap & ((key: keyof TranslationMap) => string);
 
 const LanguageContext = createContext<LanguageContextType>({
   language: 'en',
@@ -24,28 +28,52 @@ const LanguageContext = createContext<LanguageContextType>({
 });
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>('en');
 
-  const translateFn = (key: keyof TranslationMap): string => {
-    return (translations[language] as any)?.[key] || translations.en[key] || key;
-  };
+  // Load persisted language preference on startup
+  useEffect(() => {
+    let isMounted = true;
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((saved) => {
+        if (isMounted && saved && (saved === 'en' || saved === 'rw')) {
+          setLanguageState(saved as Language);
+        }
+      })
+      .catch(() => {});
 
-  const t = new Proxy(translateFn as any, {
-    get(target, prop: string) {
-      const currentDict = translations[language] as any;
-      if (currentDict && prop in currentDict) {
-        return currentDict[prop];
-      }
-      const fallbackDict = translations.en as any;
-      if (fallbackDict && prop in fallbackDict) {
-        return fallbackDict[prop];
-      }
-      return target[prop];
-    },
-  }) as TranslationMap & ((key: keyof TranslationMap) => string);
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const setLanguage = useCallback((newLang: Language) => {
+    setLanguageState(newLang);
+    AsyncStorage.setItem(STORAGE_KEY, newLang).catch(() => {});
+  }, []);
+
+  // Build reactive translation helper that supports both t.key and t('key')
+  // Using direct Object.assign instead of Proxy for 100% Hermes engine compatibility
+  const t = useMemo(() => {
+    const activeDict = translations[language] || translations.en;
+    const translate = (key: keyof TranslationMap): string => {
+      return activeDict[key] || translations.en[key] || (key as string);
+    };
+    Object.assign(translate, activeDict);
+    return translate as TranslationMap & ((key: keyof TranslationMap) => string);
+  }, [language]);
+
+  const contextValue = useMemo(
+    () => ({
+      language,
+      currentLanguage: language,
+      setLanguage,
+      t,
+    }),
+    [language, setLanguage, t]
+  );
 
   return (
-    <LanguageContext.Provider value={{ language, currentLanguage: language, setLanguage, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

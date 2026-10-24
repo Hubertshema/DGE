@@ -46,9 +46,9 @@ export const env = {
   whatsappPhone: (process.env.WHATSAPP_BUSINESS_PHONE || '').replace(/\D/g, ''),
   deliveryFeeRwf: Number(process.env.DELIVERY_FEE_RWF || 1500),
   clientOrigin: process.env.CLIENT_ORIGIN || '*',
-  adminEmail: process.env.ADMIN_EMAIL || 'admin@dgecommerce.rw',
-  adminInitialPassword: process.env.ADMIN_INITIAL_PASSWORD || 'DGAdmin2026!Rwamagana',
+  adminEmail: (process.env.ADMIN_EMAIL || '').trim().toLowerCase(),
+  adminInitialPassword: process.env.ADMIN_INITIAL_PASSWORD || '',
   adminFullName: process.env.ADMIN_FULL_NAME || 'DG Shop Owner',
-  adminPhone: process.env.ADMIN_PHONE || '+250788000000',
+  adminPhone: process.env.ADMIN_PHONE || '',
 };
 

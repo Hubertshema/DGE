@@ -258,4 +258,81 @@ export const api = {
     );
     return res.data;
   },
+
+  // Notifications
+  getNotifications: async (
+    token: string,
+    limit: number = 30,
+    offset: number = 0
+  ): Promise<{
+    notifications: Array<{
+      id: string;
+      userId: string;
+      title: string;
+      message: string;
+      type: string;
+      orderId?: string | null;
+      orderReference?: string | null;
+      isRead: boolean;
+      readAt?: string | null;
+      createdAt: string;
+    }>;
+    total: number;
+    unreadCount: number;
+  }> => {
+    const res = await request<{
+      success: boolean;
+      data: {
+        notifications: any[];
+        total: number;
+        unreadCount: number;
+      };
+    }>(`/notifications?limit=${limit}&offset=${offset}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  },
+
+  getUnreadNotificationCount: async (token: string): Promise<number> => {
+    const res = await request<{
+      success: boolean;
+      data: { unreadCount: number };
+    }>('/notifications/unread-count', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data.unreadCount;
+  },
+
+  markNotificationAsRead: async (
+    id: string,
+    token: string
+  ): Promise<{ notification: any; unreadCount: number }> => {
+    const res = await request<{
+      success: boolean;
+      data: { notification: any; unreadCount: number };
+    }>(`/notifications/${id}/read`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  },
+
+  markAllNotificationsAsRead: async (token: string): Promise<{ unreadCount: number }> => {
+    const res = await request<{
+      success: boolean;
+      data: { unreadCount: number };
+    }>('/notifications/mark-all-read', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  },
+
+  registerPushToken: async (token: string, pushToken: string): Promise<void> => {
+    await request<{ success: boolean }>('/notifications/device-token', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ token: pushToken, platform: Platform.OS }),
+    });
+  },
 };

@@ -17,6 +17,8 @@ import { ProductCard } from '../components/ProductCard';
 import { Product } from '../../../types';
 import { useProductsQuery } from '../../../api/queries';
 import { useCart } from '../../../state/CartContext';
+import { useLanguage } from '../../../localization/LanguageContext';
+import { getCategoryTranslation } from '../../../localization/translations';
 import { ShoppingBag, AlertCircle } from 'lucide-react-native';
 
 type CategoryScreenRouteProp = RouteProp<RootStackParamList, 'CategoryProducts'>;
@@ -27,6 +29,7 @@ export const CategoryProductsScreen: React.FC = () => {
   const route = useRoute<CategoryScreenRouteProp>();
   const navigation = useNavigation<NavigationProp>();
   const { addToCart } = useCart();
+  const { t } = useLanguage();
 
   const { category } = route.params;
 
@@ -50,8 +53,8 @@ export const CategoryProductsScreen: React.FC = () => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" />
       <Header
-        title={category}
-        subtitle="D&G Rwanda Collection"
+        title={getCategoryTranslation(category, t)}
+        subtitle={t.browseCollections}
         showBack
         onBackPress={() => navigation.goBack()}
       />
@@ -70,7 +73,7 @@ export const CategoryProductsScreen: React.FC = () => {
             {productsError.message}
           </Text>
           <Button
-            title="Try Again"
+            title={t.tryAgain}
             onPress={() => refetch()}
             style={{ marginTop: spacing.md, minWidth: 140 }}
           />
@@ -105,8 +108,8 @@ export const CategoryProductsScreen: React.FC = () => {
           ListEmptyComponent={
             <EmptyState
               icon={<ShoppingBag size={48} color={colors.primary} />}
-              title="No items in this category"
-              message={`Currently there are no ${category.toLowerCase()} listed. Check back soon as our inventory is updated daily.`}
+              title={t.noItemsFound}
+              message={t.noProductsListed}
             />
           }
         />

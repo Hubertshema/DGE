@@ -10,6 +10,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { queryClient, asyncStoragePersister, persistDehydrateOptions } from './src/api/queryClient';
 import { useAppStateFocus } from './src/api/useAppStateFocus';
 import { AuthProvider } from './src/state/AuthContext';
+import { NotificationProvider } from './src/state/NotificationContext';
 import { CartProvider } from './src/state/CartContext';
 import { LanguageProvider } from './src/localization/LanguageContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
@@ -32,9 +33,11 @@ function App(): React.JSX.Element {
       >
         <LanguageProvider>
           <AuthProvider>
-            <CartProvider>
-              <AppNavigator />
-            </CartProvider>
+            <NotificationProvider>
+              <CartProvider>
+                <AppNavigator />
+              </CartProvider>
+            </NotificationProvider>
           </AuthProvider>
         </LanguageProvider>
       </PersistQueryClientProvider>

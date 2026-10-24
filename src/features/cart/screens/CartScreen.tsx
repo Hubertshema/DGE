@@ -14,6 +14,7 @@ import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius } from '../../../theme';
 import { Header, Button, EmptyState, CachedImage } from '../../../components/common';
 import { useCart } from '../../../state/CartContext';
+import { useLanguage } from '../../../localization/LanguageContext';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -22,17 +23,18 @@ export const CartScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { items, subtotal, updateQuantity, removeFromCart } = useCart();
+  const { t } = useLanguage();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Header title="Shopping Cart" subtitle={`${items.length} unique items`} />
+      <Header title={t.shoppingCart} subtitle={`${items.length} ${t.uniqueCount}`} />
 
       {items.length === 0 ? (
         <EmptyState
           icon={<ShoppingBag size={56} color={colors.primary} />}
-          title="Your Cart is Empty"
-          message="Browse through our collections and discover the best items in Rwanda."
-          actionTitle="Start Shopping"
+          title={t.cartEmpty}
+          message={t.cartEmptyDesc}
+          actionTitle={t.startShopping}
           onAction={() => navigation.navigate('MainTabs', { screen: 'HomeTab' } as any)}
         />
       ) : (
@@ -96,14 +98,14 @@ export const CartScreen: React.FC = () => {
           {/* Checkout Footer */}
           <View style={[styles.footer, { paddingBottom: insets.bottom || spacing.md }]}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Subtotal</Text>
+              <Text style={styles.summaryLabel}>{t.subtotal}</Text>
               <Text style={styles.summaryValue}>RWF {subtotal.toLocaleString()}</Text>
             </View>
             <Text style={styles.serverNote}>
               * Delivery fee and exact total will be verified by the server at checkout.
             </Text>
             <Button
-              title="Proceed to Checkout"
+              title={t.checkoutBtn}
               onPress={() => navigation.navigate('Checkout')}
               style={styles.checkoutBtn}
             />

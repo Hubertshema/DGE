@@ -26,6 +26,7 @@ import { LanguageSettingsScreen } from '../features/profile/screens/LanguageSett
 import { LoginScreen } from '../features/auth/screens/LoginScreen';
 import { RegisterScreen } from '../features/auth/screens/RegisterScreen';
 import { ChangePasswordScreen } from '../features/auth/screens/ChangePasswordScreen';
+import { NotificationCenterScreen } from '../features/notifications/screens/NotificationCenterScreen';
 
 // Admin Screens
 import { SellerDashboardScreen } from '../features/seller/screens/SellerDashboardScreen';
@@ -52,10 +53,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const MainTabs: React.FC = () => {
   const { itemCount } = useCart();
   const { isAuthenticated } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <Tab.Navigator
+      key={`main-tabs-${language}`}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
@@ -156,6 +158,7 @@ export const AppNavigator: React.FC = () => {
         <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
         <Stack.Screen name="DeliveryAddresses" component={DeliveryAddressesScreen} />
         <Stack.Screen name="LanguageSettings" component={LanguageSettingsScreen} />
+        <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />

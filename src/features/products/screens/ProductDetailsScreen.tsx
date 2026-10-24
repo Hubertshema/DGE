@@ -16,6 +16,7 @@ import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius } from '../../../theme';
 import { Header, Button, Badge, CachedImage, ProductDetailsSkeleton, SyncIndicator } from '../../../components/common';
 import { useCart } from '../../../state/CartContext';
+import { useLanguage } from '../../../localization/LanguageContext';
 import { ShoppingBag, Check, ShieldCheck, AlertCircle } from 'lucide-react-native';
 import { useProductQuery } from '../../../api/queries';
 import { Product } from '../../../types';
@@ -30,6 +31,7 @@ export const ProductDetailsScreen: React.FC = () => {
   const route = useRoute<RouteProps>();
   const { productId, productName } = route.params;
   const { addToCart } = useCart();
+  const { t } = useLanguage();
 
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState<boolean>(false);
@@ -59,7 +61,7 @@ export const ProductDetailsScreen: React.FC = () => {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <Header
-        title={product?.name || productName || 'Product Details'}
+        title={product?.name || productName || t.productDetails}
         showBack
         onBackPress={() => navigation.goBack()}
         rightAction={
@@ -73,7 +75,7 @@ export const ProductDetailsScreen: React.FC = () => {
       />
 
       {/* Subtle sync indicator for background price/stock verification */}
-      <SyncIndicator isSyncing={isBackgroundSyncing} label="Verifying stock & price..." />
+      <SyncIndicator isSyncing={isBackgroundSyncing} label={t.verifyingStockPrice} />
 
       {showSkeleton ? (
         <ProductDetailsSkeleton />
@@ -87,7 +89,7 @@ export const ProductDetailsScreen: React.FC = () => {
             {productError.message}
           </Text>
           <Button
-            title="Try Again"
+            title={t.tryAgain}
             onPress={() => refetchProduct()}
             style={{ marginTop: spacing.md, minWidth: 140 }}
           />
@@ -114,7 +116,7 @@ export const ProductDetailsScreen: React.FC = () => {
                 RWF {product?.price ? product.price.toLocaleString() : '--'}
               </Text>
               <Badge
-                label={product?.isAvailable && product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
+                label={product?.isAvailable && product.stock > 0 ? `${t.inStock} (${product.stock})` : t.outOfStock}
                 variant={product?.isAvailable && product.stock > 0 ? 'success' : 'danger'}
               />
             </View>
@@ -125,7 +127,7 @@ export const ProductDetailsScreen: React.FC = () => {
 
             <View style={styles.divider} />
 
-            <Text style={styles.sectionHeader}>Product Description</Text>
+            <Text style={styles.sectionHeader}>{t.description}</Text>
             <Text style={styles.description}>
               {product?.description || 'Quality product verified by D&G store in Rwamagana.'}
             </Text>
@@ -144,7 +146,7 @@ export const ProductDetailsScreen: React.FC = () => {
       {!showSkeleton && !productError && product ? (
         <View style={[styles.footer, { paddingBottom: insets.bottom || spacing.md }]}>
           <Button
-            title={isAdded ? 'Added to Cart ✓' : 'Add to Cart'}
+            title={isAdded ? `${t.addedToCart} ✓` : t.addToCart}
             variant={isAdded ? 'accent' : 'primary'}
             icon={<ShoppingBag size={18} color={colors.white} />}
             onPress={handleAddToCart}

@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,7 +16,10 @@ import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius } from '../../../theme';
 import { Header, Input, Button, Logo } from '../../../components/common';
 import { useAuth } from '../../../state/AuthContext';
+import { useLanguage } from '../../../localization/LanguageContext';
 import { Lock, Mail } from 'lucide-react-native';
+
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -15,23 +27,32 @@ export const LoginScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { login, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const handleLogin = async () => {
     if (isLoading) return;
 
-    if (!email.trim() || !password.trim()) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password.trim()) {
       Alert.alert('Required Fields', 'Please enter your email and password.');
       return;
     }
-    const res = await login(email, password);
+
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      setEmailError('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
+    setEmailError('');
+
+    const res = await login(trimmedEmail, password);
     if (res.success) {
       if (res.mustChangePassword) {
         navigation.replace('ChangePassword', { isFirstLogin: true });
       } else if (res.isAdmin || res.role === 'admin' || res.user?.role === 'admin') {
-        // Automatically route admin user directly to their Admin Dashboard
         navigation.replace('AdminDashboard');
       } else {
         navigation.goBack();
@@ -41,57 +62,69 @@ export const LoginScreen: React.FC = () => {
     }
   };
 
-
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <Header
-        title="Sign In"
+        title={t.signIn}
         showBack
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.brandHeader}>
-          <Logo size={72} style={{ marginBottom: spacing.md, alignSelf: 'center' }} />
-          <Text style={styles.brandTitle}>D&G</Text>
-          <Text style={styles.brandSubtitle}>Sign in to your account</Text>
-        </View>
-
-        <View style={styles.formCard}>
-          <Input
-            label="Email Address"
-            placeholder="name@example.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            leftIcon={<Mail size={18} color={colors.textSecondary} />}
-          />
-
-          <Input
-            label="Password"
-            placeholder="••••••••"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            leftIcon={<Lock size={18} color={colors.textSecondary} />}
-          />
-
-          <Button
-            title="Sign In"
-            onPress={handleLogin}
-            isLoading={isLoading}
-            style={styles.loginBtn}
-          />
-
-          <View style={styles.registerPrompt}>
-            <Text style={styles.promptText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.replace('Register')}>
-              <Text style={styles.registerLink}>Register</Text>
-            </TouchableOpacity>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoid}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.brandHeader}>
+            <Logo size={72} style={{ marginBottom: spacing.md, alignSelf: 'center' }} />
+            <Text style={styles.brandTitle}>D&G</Text>
+            <Text style={styles.brandSubtitle}>{t.signInSubtitle}</Text>
           </View>
-        </View>
-      </ScrollView>
+
+          <View style={styles.formCard}>
+            <Input
+              label={t.emailAddress}
+              placeholder="name@example.com"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (emailError) setEmailError('');
+              }}
+              error={emailError}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              leftIcon={<Mail size={18} color={colors.textSecondary} />}
+            />
+
+            <Input
+              label={t.password}
+              placeholder="••••••••"
+              value={password}
+              onChangeText={setPassword}
+              isPassword
+              leftIcon={<Lock size={18} color={colors.textSecondary} />}
+            />
+
+            <Button
+              title={t.signIn}
+              onPress={handleLogin}
+              isLoading={isLoading}
+              style={styles.loginBtn}
+            />
+
+            <View style={styles.registerPrompt}>
+              <Text style={styles.promptText}>{t.noAccount} </Text>
+              <TouchableOpacity onPress={() => navigation.replace('Register')}>
+                <Text style={styles.registerLink}>{t.register}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -100,6 +133,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   scrollContent: {
     padding: spacing.lg,

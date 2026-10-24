@@ -20,9 +20,11 @@ import { Product } from '../../../types';
 import { ProductCard } from '../components/ProductCard';
 import { useCart } from '../../../state/CartContext';
 import { useLanguage } from '../../../localization/LanguageContext';
-import { Search, ShoppingBag, Globe } from 'lucide-react-native';
+import { getCategoryTranslation } from '../../../localization/translations';
+import { Search, ShoppingBag, Globe, Bell } from 'lucide-react-native';
 import { useCategoriesQuery, useProductsQuery } from '../../../api/queries';
 import { Logo, ProductListSkeleton, SyncIndicator, Button } from '../../../components/common';
+import { useNotifications } from '../../../state/NotificationContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -30,7 +32,8 @@ export const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { itemCount, addToCart } = useCart();
-  const { currentLanguage, setLanguage } = useLanguage();
+  const { currentLanguage, setLanguage, t } = useLanguage();
+  const { unreadCount } = useNotifications();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
@@ -64,11 +67,11 @@ export const HomeScreen: React.FC = () => {
           <Logo size={40} style={styles.brandLogo} />
           <View style={styles.brandTextGroup}>
             <Text style={styles.brandTitle}>D&G</Text>
-            <Text style={styles.brandLocation}>Rwamagana, Rwanda</Text>
+            <Text style={styles.brandLocation}>{t.rwamaganaLocation}</Text>
           </View>
         </View>
 
-        {/* Top Right Corner: Language selector, Search icon, and Cart icon */}
+        {/* Top Right Corner: Language selector, Notifications bell, Search icon, and Cart icon */}
         <View style={styles.headerActions}>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -78,6 +81,22 @@ export const HomeScreen: React.FC = () => {
           >
             <Globe size={15} color={colors.primary} />
             <Text style={styles.langText}>{currentLanguage.toUpperCase()}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('NotificationCenter')}
+            style={styles.iconButton}
+            accessibilityLabel={`Notifications (${unreadCount} unread)`}
+          >
+            <Bell size={22} color={colors.textPrimary} />
+            {unreadCount > 0 ? (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.badgeText}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            ) : null}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -126,7 +145,7 @@ export const HomeScreen: React.FC = () => {
                 selectedCategory === 'All' && styles.categoryTextActive,
               ]}
             >
-              All Items
+              {t.allItems}
             </Text>
           </TouchableOpacity>
 
@@ -145,7 +164,7 @@ export const HomeScreen: React.FC = () => {
                     isActive && styles.categoryTextActive,
                   ]}
                 >
-                  {cat.name}
+                  {getCategoryTranslation(cat.name, t)}
                 </Text>
               </TouchableOpacity>
             );
@@ -154,7 +173,7 @@ export const HomeScreen: React.FC = () => {
       </View>
 
       {/* Subtle Background Sync Indicator (No skeleton flash during refresh) */}
-      <SyncIndicator isSyncing={isBackgroundSyncing} label="Checking for new inventory..." />
+      <SyncIndicator isSyncing={isBackgroundSyncing} label={t.checkingInventory} />
 
       {/* Product Grid / Skeleton / Error / Empty State */}
       {showSkeleton ? (
@@ -166,10 +185,10 @@ export const HomeScreen: React.FC = () => {
           <View style={styles.emptyIconContainer}>
             <ShoppingBag size={48} color={colors.accent} />
           </View>
-          <Text style={styles.emptyTitle}>Unable to Load Products</Text>
+          <Text style={styles.emptyTitle}>{t.unableToLoad}</Text>
           <Text style={styles.emptySubtitle}>{productsError.message}</Text>
           <Button
-            title="Try Again"
+            title={t.tryAgain}
             onPress={() => refetchProducts()}
             style={{ marginTop: spacing.md, minWidth: 140 }}
           />
@@ -205,9 +224,9 @@ export const HomeScreen: React.FC = () => {
               <View style={styles.emptyIconContainer}>
                 <ShoppingBag size={48} color={colors.primary} />
               </View>
-              <Text style={styles.emptyTitle}>No Items Found</Text>
+              <Text style={styles.emptyTitle}>{t.noItemsFound}</Text>
               <Text style={styles.emptySubtitle}>
-                {`No products listed in "${selectedCategory}" right now.`}
+                {t.noProductsListed}
               </Text>
             </View>
           }
@@ -291,10 +310,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  notificationBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: colors.danger,
+    minWidth: 17,
+    height: 17,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.white,
+  },
   badgeText: {
     color: colors.white,
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9,
+    fontWeight: '800',
   },
   categoryBar: {
     backgroundColor: colors.white,

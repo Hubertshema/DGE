@@ -38,6 +38,10 @@ jest.mock('../src/api/client', () => ({
     createOrder: jest.fn().mockResolvedValue({ id: 'test', orderReference: 'DG-TEST' }),
     login: jest.fn(),
     register: jest.fn(),
+    getNotifications: jest.fn().mockResolvedValue({ notifications: [], total: 0, unreadCount: 0 }),
+    getUnreadNotificationCount: jest.fn().mockResolvedValue(0),
+    markNotificationAsRead: jest.fn().mockResolvedValue({ unreadCount: 0 }),
+    markAllNotificationsAsRead: jest.fn().mockResolvedValue({ unreadCount: 0 }),
   },
   API_BASE_URL: 'http://localhost:5000/api/v1',
 }));

@@ -2,10 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, spacing, borderRadius } from '../../theme';
-import { ArrowLeft, Search, ShoppingBag, Globe } from 'lucide-react-native';
+import { ArrowLeft, Search, ShoppingBag, Globe, Bell } from 'lucide-react-native';
 import { Logo } from './Logo';
 import { useCart } from '../../state/CartContext';
 import { useLanguage } from '../../localization/LanguageContext';
+import { useNotifications } from '../../state/NotificationContext';
 
 export interface HeaderProps {
   title: string;
@@ -14,6 +15,7 @@ export interface HeaderProps {
   showLogo?: boolean;
   onBackPress?: () => void;
   showRightActions?: boolean;
+  showNotificationBell?: boolean;
   rightAction?: React.ReactNode;
   style?: ViewStyle;
 }
@@ -25,12 +27,32 @@ export const Header: React.FC<HeaderProps> = ({
   showLogo = false,
   onBackPress,
   showRightActions = false,
+  showNotificationBell = false,
   rightAction,
   style,
 }) => {
   const navigation = useNavigation<any>();
   const { itemCount } = useCart();
   const { currentLanguage, setLanguage } = useLanguage();
+  const { unreadCount } = useNotifications();
+
+  const renderBell = () => (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => navigation.navigate('NotificationCenter')}
+      style={styles.iconButton}
+      accessibilityLabel={`Notifications (${unreadCount} unread)`}
+    >
+      <Bell size={20} color={colors.textPrimary} />
+      {unreadCount > 0 ? (
+        <View style={styles.notificationBadge}>
+          <Text style={styles.badgeText}>
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </Text>
+        </View>
+      ) : null}
+    </TouchableOpacity>
+  );
 
   return (
     <View style={[styles.container, style]}>
@@ -75,6 +97,8 @@ export const Header: React.FC<HeaderProps> = ({
             <Text style={styles.langText}>{currentLanguage.toUpperCase()}</Text>
           </TouchableOpacity>
 
+          {renderBell()}
+
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('MainTabs', { screen: 'SearchTab' })}
@@ -97,6 +121,10 @@ export const Header: React.FC<HeaderProps> = ({
               </View>
             ) : null}
           </TouchableOpacity>
+        </View>
+      ) : showNotificationBell ? (
+        <View style={styles.rightContainer}>
+          {renderBell()}
         </View>
       ) : null}
     </View>
@@ -177,9 +205,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  notificationBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: colors.danger,
+    minWidth: 17,
+    height: 17,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.white,
+  },
   badgeText: {
     color: colors.white,
     fontSize: 9,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 });

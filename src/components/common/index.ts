@@ -7,4 +7,5 @@ export * from './LoadingSpinner';
 export * from './Header';
 export * from './Logo';
 export * from './CachedImage';
+export * from './PasswordStrengthIndicator';
 export * from '../skeleton';

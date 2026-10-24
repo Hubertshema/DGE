@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { pool, query } from '../db';
 import { authenticateToken, requireAdmin, optionalAuth, AuthRequest } from '../middleware/auth';
 import { env } from '../config/env';
+import { NotificationService } from '../services/notificationService';
 
 const router = Router();
 
@@ -124,6 +125,29 @@ router.post('/', async (req: Request, res: Response) => {
     );
 
     await client.query('COMMIT');
+
+    // Asynchronously dispatch notifications to customer and seller
+    try {
+      if (userId) {
+        await NotificationService.notifyCustomer(userId, {
+          title: 'Order Placed Successfully',
+          message: `Your order #${orderReference} for ${Number(totalAmount).toLocaleString()} RWF was placed. Please complete payment via WhatsApp.`,
+          type: 'order_created',
+          orderId: order.id,
+          orderReference,
+        });
+      }
+
+      await NotificationService.notifyAdmins({
+        title: 'New Customer Order!',
+        message: `New order #${orderReference} from ${String(customerName).trim()} (${Number(totalAmount).toLocaleString()} RWF) requires review.`,
+        type: 'new_order',
+        orderId: order.id,
+        orderReference,
+      });
+    } catch (notifErr) {
+      console.error('Failed to dispatch order placement notification:', notifErr);
+    }
 
     // Generate WhatsApp payment message URL for DG Shop Owner
     const itemsSummary = validatedItems
@@ -495,6 +519,49 @@ router.patch('/:id/status', authenticateToken, requireAdmin, async (req: AuthReq
 
     await client.query('COMMIT');
 
+    const updatedOrder = result.rows[0];
+
+    // Asynchronously dispatch notifications based on status change
+    try {
+      const statusTitles: Record<string, string> = {
+        confirmed: 'Order Confirmed',
+        processing: 'Order Processing',
+        shipped: 'Order Dispatched',
+        delivered: 'Order Delivered',
+        cancelled: 'Order Cancelled',
+      };
+
+      const statusMessages: Record<string, string> = {
+        confirmed: `Your order #${updatedOrder.order_reference} has been accepted and confirmed by D&G.`,
+        processing: `Your order #${updatedOrder.order_reference} is being prepared at D&G Store Rwamagana.`,
+        shipped: `Your order #${updatedOrder.order_reference} has been shipped and is on its way to you.`,
+        delivered: `Your order #${updatedOrder.order_reference} was successfully delivered. Thank you for shopping with D&G!`,
+        cancelled: `Your order #${updatedOrder.order_reference} has been cancelled.`,
+      };
+
+      if (updatedOrder.user_id && statusTitles[status]) {
+        await NotificationService.notifyCustomer(updatedOrder.user_id, {
+          title: statusTitles[status],
+          message: statusMessages[status],
+          type: `order_${status}`,
+          orderId: updatedOrder.id,
+          orderReference: updatedOrder.order_reference,
+        });
+      }
+
+      if (status === 'cancelled') {
+        await NotificationService.notifyAdmins({
+          title: 'Order Cancelled',
+          message: `Order #${updatedOrder.order_reference} has been marked as cancelled. Stock was restored.`,
+          type: 'order_cancelled',
+          orderId: updatedOrder.id,
+          orderReference: updatedOrder.order_reference,
+        });
+      }
+    } catch (notifErr) {
+      console.error('Failed to dispatch status notification:', notifErr);
+    }
+
     res.json({ success: true, data: result.rows[0], message: `Order status updated to ${status}.` });
   } catch (error: any) {
     await client.query('ROLLBACK');
@@ -542,6 +609,41 @@ router.patch('/:id/verify-payment', authenticateToken, requireAdmin, async (req:
     );
 
     await client.query('COMMIT');
+
+    const verifiedOrder = orderRes.rows[0];
+
+    // Asynchronously dispatch payment update notifications
+    try {
+      if (verifiedOrder.user_id) {
+        if (paymentStatus === 'paid') {
+          await NotificationService.notifyCustomer(verifiedOrder.user_id, {
+            title: 'Payment Confirmed! 🎉',
+            message: `Your payment of ${Number(verifiedOrder.total_amount).toLocaleString()} RWF for order #${verifiedOrder.order_reference} has been verified successfully.`,
+            type: 'payment_verified',
+            orderId: verifiedOrder.id,
+            orderReference: verifiedOrder.order_reference,
+          });
+        } else if (paymentStatus === 'payment_rejected') {
+          await NotificationService.notifyCustomer(verifiedOrder.user_id, {
+            title: 'Payment Verification Notice',
+            message: `Payment for order #${verifiedOrder.order_reference} could not be verified. Please check WhatsApp for instructions.`,
+            type: 'payment_rejected',
+            orderId: verifiedOrder.id,
+            orderReference: verifiedOrder.order_reference,
+          });
+        }
+      }
+
+      await NotificationService.notifyAdmins({
+        title: paymentStatus === 'paid' ? 'Payment Verified' : 'Payment Update',
+        message: `Payment of ${Number(verifiedOrder.total_amount).toLocaleString()} RWF for order #${verifiedOrder.order_reference} recorded as ${paymentStatus}.`,
+        type: `payment_${paymentStatus}`,
+        orderId: verifiedOrder.id,
+        orderReference: verifiedOrder.order_reference,
+      });
+    } catch (notifErr) {
+      console.error('Failed to dispatch payment notification:', notifErr);
+    }
 
     res.json({
       success: true,

@@ -7,6 +7,17 @@ import { env } from '../config/env';
 
 const router = Router();
 const SALT_ROUNDS = 10;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+export const isStrongPassword = (pass: string): boolean => {
+  if (!pass || typeof pass !== 'string') return false;
+  return (
+    pass.length >= 8 &&
+    /[A-Z]/.test(pass) &&
+    /[a-z]/.test(pass) &&
+    /[0-9]/.test(pass)
+  );
+};
 
 // Customer Registration (Strictly customer role only)
 router.post('/register', async (req: Request, res: Response) => {
@@ -23,10 +34,18 @@ router.post('/register', async (req: Request, res: Response) => {
   const trimmedName = String(fullName).trim();
   const trimmedPhone = phone ? String(phone).trim() : null;
 
-  if (password.length < 6) {
+  if (!EMAIL_REGEX.test(trimmedEmail)) {
     return res.status(400).json({
       success: false,
-      error: 'Password must be at least 6 characters long.',
+      error: 'Please provide a valid email address (e.g. name@example.com).',
+    });
+  }
+
+  if (!isStrongPassword(password)) {
+    return res.status(400).json({
+      success: false,
+      error:
+        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.',
     });
   }
 
@@ -73,6 +92,12 @@ router.post('/register', async (req: Request, res: Response) => {
       message: 'Customer account created successfully.',
     });
   } catch (error: any) {
+    if (error.code === '23505') {
+      return res.status(409).json({
+        success: false,
+        error: 'An account with this email address already exists.',
+      });
+    }
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -149,10 +174,11 @@ router.post('/change-password', authenticateToken, async (req: AuthRequest, res:
     });
   }
 
-  if (newPassword.length < 8) {
+  if (!isStrongPassword(newPassword)) {
     return res.status(400).json({
       success: false,
-      error: 'New password must be at least 8 characters long.',
+      error:
+        'New password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.',
     });
   }
 

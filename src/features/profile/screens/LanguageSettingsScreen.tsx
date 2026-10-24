@@ -21,8 +21,8 @@ export const LanguageSettingsScreen: React.FC = () => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" />
       <Header
-        title="Language Settings"
-        subtitle="Hitamo Ururimi"
+        title={t.languageSettings}
+        subtitle={t.chooseLanguage}
         showBack
         onBackPress={() => navigation.goBack()}
       />
@@ -67,8 +67,7 @@ export const LanguageSettingsScreen: React.FC = () => {
         </View>
 
         <Text style={styles.note}>
-          Language changes apply immediately across navigation labels, order statuses, and
-          shopping flows.
+          {t.languageAppliedNote}
         </Text>
       </View>
     </View>

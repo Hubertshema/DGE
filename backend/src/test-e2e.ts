@@ -34,7 +34,7 @@ async function runE2ETests() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: env.adminEmail,
-        password: 'DGAdmin2026!UpdatedSecure',
+        password: `${env.adminInitialPassword}!Updated`,
       }),
     });
     adminLoginData = await adminLoginRes.json();
@@ -48,7 +48,7 @@ async function runE2ETests() {
     // 3. Test Password Change if mustChangePassword
     if (adminLoginData.data.user.mustChangePassword) {
       console.log('\n3️⃣ Testing Admin Password Change on First Login...');
-      const newAdminPassword = 'DGAdmin2026!UpdatedSecure';
+      const newAdminPassword = `${env.adminInitialPassword}!Updated`;
       const changeRes = await fetch(`${BASE_URL}/auth/change-password`, {
         method: 'POST',
         headers: {

@@ -98,6 +98,7 @@ export const SellerDashboardScreen: React.FC = () => {
         subtitle="DG Store Owner Portal (Rwamagana)"
         showBack
         showLogo
+        showNotificationBell
         onBackPress={() => navigation.goBack()}
       />
 

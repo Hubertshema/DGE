@@ -9,6 +9,7 @@ import {
   TextStyle,
   TouchableOpacity,
 } from 'react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 
 export interface InputProps extends TextInputProps {
@@ -20,6 +21,7 @@ export interface InputProps extends TextInputProps {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   onRightIconPress?: () => void;
+  isPassword?: boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -31,12 +33,15 @@ export const Input: React.FC<InputProps> = ({
   leftIcon,
   rightIcon,
   onRightIconPress,
+  isPassword = false,
+  secureTextEntry,
   onFocus,
   onBlur,
   editable = true,
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleFocus = (e: any) => {
     setIsFocused(true);
@@ -71,9 +76,23 @@ export const Input: React.FC<InputProps> = ({
           onFocus={handleFocus}
           onBlur={handleBlur}
           editable={editable}
+          secureTextEntry={isPassword ? !showPassword : secureTextEntry}
           {...rest}
         />
-        {rightIcon ? (
+        {isPassword ? (
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.rightIconContainer}
+            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+            activeOpacity={0.7}
+          >
+            {showPassword ? (
+              <EyeOff size={20} color={colors.textSecondary} />
+            ) : (
+              <Eye size={20} color={colors.textSecondary} />
+            )}
+          </TouchableOpacity>
+        ) : rightIcon ? (
           <TouchableOpacity
             disabled={!onRightIconPress}
             onPress={onRightIconPress}

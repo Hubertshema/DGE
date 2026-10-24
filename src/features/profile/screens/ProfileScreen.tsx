@@ -49,30 +49,30 @@ export const ProfileScreen: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'delivered':
-        return <Badge label="Delivered" variant="success" size="small" />;
+        return <Badge label={t.delivered} variant="success" size="small" />;
       case 'shipped':
-        return <Badge label="Shipped" variant="info" size="small" />;
+        return <Badge label={t.shipped} variant="info" size="small" />;
       case 'processing':
-        return <Badge label="Processing" variant="info" size="small" />;
+        return <Badge label={t.processing} variant="info" size="small" />;
       case 'confirmed':
-        return <Badge label="Confirmed" variant="success" size="small" />;
+        return <Badge label={t.confirmed} variant="success" size="small" />;
       case 'cancelled':
-        return <Badge label="Cancelled" variant="danger" size="small" />;
+        return <Badge label={t.cancelled} variant="danger" size="small" />;
       default:
-        return <Badge label="Pending" variant="warning" size="small" />;
+        return <Badge label={t.pending} variant="warning" size="small" />;
     }
   };
 
   const getPaymentBadge = (status: string) => {
     switch (status) {
       case 'paid':
-        return <Badge label="Paid" variant="success" size="small" />;
+        return <Badge label={t.paid} variant="success" size="small" />;
       case 'payment_rejected':
-        return <Badge label="Payment Rejected" variant="danger" size="small" />;
+        return <Badge label={t.payment_rejected} variant="danger" size="small" />;
       case 'payment_under_review':
-        return <Badge label="Reviewing" variant="info" size="small" />;
+        return <Badge label={t.payment_under_review} variant="info" size="small" />;
       default:
-        return <Badge label="Awaiting Payment" variant="warning" size="small" />;
+        return <Badge label={t.awaiting_payment} variant="warning" size="small" />;
     }
   };
 
@@ -84,10 +84,8 @@ export const ProfileScreen: React.FC = () => {
           <View style={styles.avatar}>
             <User size={36} color={colors.primary} />
           </View>
-          <Text style={styles.guestTitle}>Sign in to your Account</Text>
-          <Text style={styles.guestMessage}>
-            Please sign in to view your orders, delivery details, and account settings.
-          </Text>
+          <Text style={styles.guestTitle}>{t.signInPrompt}</Text>
+          <Text style={styles.guestMessage}>{t.signInPromptDesc}</Text>
           <Button
             title={t.signIn}
             onPress={() => navigation.navigate('Login')}
@@ -240,7 +238,7 @@ export const ProfileScreen: React.FC = () => {
                   onPress={() => navigation.navigate('MyOrders')}
                 >
                   <Text style={styles.viewAllOrdersText}>
-                    View All Orders ({orders.length})
+                    {t.myOrders} ({orders.length})
                   </Text>
                   <ChevronRight size={16} color={colors.primary} />
                 </TouchableOpacity>
@@ -249,15 +247,15 @@ export const ProfileScreen: React.FC = () => {
           ) : (
             <View style={styles.emptyOrdersContainer}>
               <ShoppingBag size={32} color={colors.textSecondary} style={{ marginBottom: 6 }} />
-              <Text style={styles.emptyOrdersTitle}>No orders placed yet</Text>
+              <Text style={styles.emptyOrdersTitle}>{t.emptyOrders}</Text>
               <Text style={styles.emptyOrdersSubtitle}>
-                Your order tracking, receipts, and delivery updates will appear here.
+                {t.emptyOrdersDesc}
               </Text>
               <TouchableOpacity
                 style={styles.shopNowBtn}
                 onPress={() => navigation.navigate('MainTabs', { screen: 'HomeTab' } as any)}
               >
-                <Text style={styles.shopNowBtnText}>Browse Products</Text>
+                <Text style={styles.shopNowBtnText}>{t.startShopping}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -273,7 +271,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <View style={styles.menuItemLeft}>
               <MapPin size={20} color={colors.primary} />
-              <Text style={styles.menuItemText}>Delivery Addresses</Text>
+              <Text style={styles.menuItemText}>{t.deliveryAddresses}</Text>
             </View>
             <ChevronRight size={18} color={colors.textSecondary} />
           </TouchableOpacity>
@@ -301,7 +299,7 @@ export const ProfileScreen: React.FC = () => {
             <View style={styles.menuItemLeft}>
               <Globe size={20} color={colors.primary} />
               <Text style={styles.menuItemText}>
-                Language: {currentLanguage === 'rw' ? 'Ikinyarwanda' : 'English'}
+                {t.languageSettings}: {currentLanguage === 'rw' ? 'Ikinyarwanda' : 'English'}
               </Text>
             </View>
             <ChevronRight size={18} color={colors.textSecondary} />

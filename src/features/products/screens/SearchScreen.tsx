@@ -10,8 +10,7 @@ import { Search, X } from 'lucide-react-native';
 import { Product } from '../../../types';
 import { ProductCard } from '../components/ProductCard';
 import { useCart } from '../../../state/CartContext';
-import { api } from '../../../api/client';
-
+import { useLanguage } from '../../../localization/LanguageContext';
 import { useProductsQuery } from '../../../api/queries';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -20,6 +19,7 @@ export const SearchScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { addToCart } = useCart();
+  const { t } = useLanguage();
 
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -45,7 +45,7 @@ export const SearchScreen: React.FC = () => {
       <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
         <Input
-          placeholder="Search clothes, shoes, bags, household..."
+          placeholder={t.searchPlaceholder}
           value={query}
           onChangeText={handleQueryChange}
           leftIcon={<Search size={20} color={colors.textSecondary} />}
@@ -89,11 +89,11 @@ export const SearchScreen: React.FC = () => {
           ListEmptyComponent={
             <EmptyState
               icon={<Search size={48} color={colors.primary} />}
-              title={query ? 'No matching products' : 'Search D&G Store'}
+              title={query ? t.noMatchingTitle : t.searchTitle}
               message={
                 query
-                  ? `No products found matching "${query}". Check spelling or try a different keyword.`
-                  : 'Enter a keyword above to search through our Rwandan inventory.'
+                  ? t.noMatchingDesc
+                  : t.searchPrompt
               }
             />
           }

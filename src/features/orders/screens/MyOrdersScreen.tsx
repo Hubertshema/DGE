@@ -15,6 +15,7 @@ import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius, shadows } from '../../../theme';
 import { Header, Badge, EmptyState, OrderListSkeleton, SyncIndicator, Button } from '../../../components/common';
 import { useAuth } from '../../../state/AuthContext';
+import { useLanguage } from '../../../localization/LanguageContext';
 import { useOrdersQuery } from '../../../api/queries';
 import { Package, ChevronRight, Calendar, CreditCard, AlertCircle } from 'lucide-react-native';
 
@@ -24,6 +25,7 @@ export const MyOrdersScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { user, token, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
 
   const {
     data: orders = [],
@@ -44,30 +46,30 @@ export const MyOrdersScreen: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'delivered':
-        return <Badge label="Delivered" variant="success" />;
+        return <Badge label={t.delivered} variant="success" />;
       case 'shipped':
-        return <Badge label="Shipped" variant="info" />;
+        return <Badge label={t.shipped} variant="info" />;
       case 'processing':
-        return <Badge label="Processing" variant="info" />;
+        return <Badge label={t.processing} variant="info" />;
       case 'confirmed':
-        return <Badge label="Confirmed" variant="success" />;
+        return <Badge label={t.confirmed} variant="success" />;
       case 'cancelled':
-        return <Badge label="Cancelled" variant="danger" />;
+        return <Badge label={t.cancelled} variant="danger" />;
       default:
-        return <Badge label="Pending" variant="warning" />;
+        return <Badge label={t.pending} variant="warning" />;
     }
   };
 
   const getPaymentBadge = (status: string) => {
     switch (status) {
       case 'paid':
-        return <Badge label="Paid" variant="success" />;
+        return <Badge label={t.paid} variant="success" />;
       case 'payment_rejected':
-        return <Badge label="Payment Rejected" variant="danger" />;
+        return <Badge label={t.payment_rejected} variant="danger" />;
       case 'payment_under_review':
-        return <Badge label="Reviewing Payment" variant="info" />;
+        return <Badge label={t.payment_under_review} variant="info" />;
       default:
-        return <Badge label="Awaiting Payment" variant="warning" />;
+        return <Badge label={t.awaiting_payment} variant="warning" />;
     }
   };
 
@@ -75,12 +77,12 @@ export const MyOrdersScreen: React.FC = () => {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <StatusBar barStyle="dark-content" />
-        <Header title="My Orders" subtitle="Order History" showBack onBackPress={() => navigation.goBack()} />
+        <Header title={t.myOrders} subtitle={t.orderHistory} showBack onBackPress={() => navigation.goBack()} />
         <EmptyState
           icon={<Package size={48} color={colors.primary} />}
-          title="Sign in to view orders"
-          message="Please sign in to track your orders, view receipts, and coordinate WhatsApp payment."
-          actionTitle="Sign In"
+          title={t.signInPrompt}
+          message={t.signInPromptDesc}
+          actionTitle={t.signIn}
           onAction={() => navigation.navigate('Login')}
         />
       </View>
@@ -91,8 +93,8 @@ export const MyOrdersScreen: React.FC = () => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" />
       <Header
-        title="My Orders"
-        subtitle={`Tracking for ${user?.fullName || 'Customer'}`}
+        title={t.myOrders}
+        subtitle={`${t.customerTracking} ${user?.fullName || t.customerGuest}`}
         showBack
         onBackPress={() => navigation.goBack()}
       />

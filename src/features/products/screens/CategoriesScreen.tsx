@@ -7,6 +7,8 @@ import { RootStackParamList } from '../../../navigation/types';
 import { colors, spacing, borderRadius, shadows } from '../../../theme';
 import { CATEGORIES } from '../../../constants/categories';
 import { Header } from '../../../components/common';
+import { useLanguage } from '../../../localization/LanguageContext';
+import { getCategoryTranslation, getCategoryDescription } from '../../../localization/translations';
 import {
   Shirt,
   Footprints,
@@ -31,6 +33,7 @@ const getCategoryIcon = (slug: string) => {
     case 'bags':
       return <ShoppingBag size={size} color={color} />;
     case 'household-equipment':
+    case 'household':
       return <Home size={size} color={color} />;
     case 'jewellery':
       return <Watch size={size} color={color} />;
@@ -44,10 +47,15 @@ const getCategoryIcon = (slug: string) => {
 export const CategoriesScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
+  const { t } = useLanguage();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Header title="Categories" subtitle="Browse D&G Collections" showRightActions />
+      <Header
+        title={t.tabCategories}
+        subtitle={t.browseCollections}
+        showRightActions
+      />
 
       <FlatList
         data={CATEGORIES}
@@ -66,9 +74,9 @@ export const CategoriesScreen: React.FC = () => {
             <View style={styles.iconCircle}>
               {getCategoryIcon(item.slug)}
             </View>
-            <Text style={styles.name}>{item.name}</Text>
+            <Text style={styles.name}>{getCategoryTranslation(item.name, t)}</Text>
             <Text style={styles.description} numberOfLines={2}>
-              {item.description}
+              {getCategoryDescription(item.slug, t) || item.description}
             </Text>
           </TouchableOpacity>
         )}

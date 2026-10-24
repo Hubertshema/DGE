@@ -31,6 +31,9 @@ export type RootStackParamList = {
   DeliveryAddresses: undefined;
   AddAddress: { returnToCheckout?: boolean };
 
+  // Notifications
+  NotificationCenter: undefined;
+
   // Auth & Security
   Login: undefined;
   Register: undefined;

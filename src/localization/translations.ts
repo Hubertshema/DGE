@@ -22,6 +22,69 @@ export const translations = {
     sellerDashboard: 'DG Owner Dashboard', // alias
     adminPortal: 'DG Shop Administration',
 
+    // Categories
+    allItems: 'All Items',
+    catClothes: 'Clothes',
+    catShoes: 'Shoes',
+    catBags: 'Bags',
+    catHousehold: 'Household equipment',
+    catJewellery: 'Jewellery',
+    catCosmetics: 'Cosmetics',
+    catClothesDesc: 'Men, women, and children fashion & apparel',
+    catShoesDesc: 'Casual, formal, athletic footwear and boots',
+    catBagsDesc: 'Handbags, backpacks, clutches, and travel gear',
+    catHouseholdDesc: 'Home appliances, kitchenware, and living essentials',
+    catJewelleryDesc: 'Watches, necklaces, rings, bracelets, and accessories',
+    catCosmeticsDesc: 'Skincare, beauty products, perfumes, and care',
+
+    // Browsing & Store UI
+    browseCollections: 'Browse D&G Collections',
+    cartEmpty: 'Your Cart is Empty',
+    cartEmptyDesc: 'Browse through our collections and discover the best items in Rwanda.',
+    startShopping: 'Start Shopping',
+    uniqueCount: 'items',
+    checkingInventory: 'Checking for new inventory...',
+    verifyingStockPrice: 'Verifying stock & price...',
+    rwamaganaLocation: 'Rwamagana, Rwanda',
+    unableToLoad: 'Unable to Load Products',
+    tryAgain: 'Try Again',
+    noItemsFound: 'No Items Found',
+    noProductsListed: 'No products listed in this category right now.',
+    searchPrompt: 'Enter a keyword above to search through our Rwandan inventory.',
+    searchTitle: 'Search D&G Store',
+    noMatchingTitle: 'No matching products',
+    noMatchingDesc: 'No products found matching your search. Check spelling or try a different keyword.',
+    quantity: 'Quantity',
+    addedToCart: 'Added to Cart',
+    productDetails: 'Product Details',
+    description: 'Description',
+    deliveryAddresses: 'Delivery Addresses',
+    languageSettings: 'Language Settings',
+    chooseLanguage: 'Hitamo Ururimi / Select Language',
+    languageAppliedNote: 'Language changes apply immediately across navigation labels, order statuses, and shopping flows.',
+    contactWhatsApp: 'Contact DG on WhatsApp',
+
+    // Auth & Accounts
+    signInPrompt: 'Sign in to your Account',
+    signInPromptDesc: 'Please sign in to view your orders, delivery details, and account settings.',
+    createAccount: 'Create Account',
+    createAccountSubtitle: 'Create your shopping account',
+    signInSubtitle: 'Sign in to your account',
+    emailAddress: 'Email Address',
+    password: 'Password',
+    noAccount: "Don't have an account?",
+    haveAccount: 'Already have an account?',
+    register: 'Register',
+    customerGuest: 'Customer',
+    customerTracking: 'Tracking for',
+
+    // Orders & Tracking
+    emptyOrders: 'No orders placed yet',
+    emptyOrdersDesc: 'When you place an order, it will appear here.',
+    orderNumber: 'Order #',
+    placedOn: 'Placed on',
+    viewDetails: 'View Details',
+
     // Admin Features
     manageProducts: 'Manage Products',
     manageCategories: 'Manage Categories',
@@ -77,6 +140,7 @@ export const translations = {
     stockLeft: 'left in stock',
 
     // Statuses
+    pending: 'Pending',
     pending_confirmation: 'Pending Confirmation',
     confirmed: 'Confirmed',
     processing: 'Processing',
@@ -127,6 +191,69 @@ export const translations = {
     adminDashboard: 'Ibiro by’Umuyobozi wa DG',
     sellerDashboard: 'Ibiro by’Umuyobozi wa DG', // alias
     adminPortal: 'Ubuyobozi bw’Iduka rya DG',
+
+    // Categories
+    allItems: 'Byose Hamwe',
+    catClothes: 'Imyenda',
+    catShoes: 'Inkweto',
+    catBags: 'Amasakoshi',
+    catHousehold: 'Ibikoresho byo mu nzu',
+    catJewellery: 'Imikufi n’Inyerere',
+    catCosmetics: 'Amavuta n’Ibirungo',
+    catClothesDesc: 'Imyenda y’abagabo, abagore n’abana',
+    catShoesDesc: 'Inkweto zo gusohokana, iz’akazi n’iza siporo',
+    catBagsDesc: 'Amasakoshi y’intoki, ibikapu n’imifuka y’ingendo',
+    catHouseholdDesc: 'Ibikoresho byo mu gikoni n’ibyo mu nzu',
+    catJewelleryDesc: 'Amasaha, imikufi, impeta n’amaso yo kurimbana',
+    catCosmeticsDesc: 'Amavuta yo kwisiga, imibavu n’ibirungo by’ubwiza',
+
+    // Browsing & Store UI
+    browseCollections: 'Reba ibicuruzwa byose bya DG',
+    cartEmpty: 'Ikarita yawe irarangiye',
+    cartEmptyDesc: 'Shakisha ibicuruzwa byiza mu Rwanda muri D&G maze ubishyire mu ikarita.',
+    startShopping: 'Tangira Guhaha',
+    uniqueCount: 'ibicuruzwa',
+    checkingInventory: 'Gusuzuma ibicuruzwa bishya...',
+    verifyingStockPrice: 'Gusuzuma ibicuruzwa n’ibiciro...',
+    rwamaganaLocation: 'Rwamagana, u Rwanda',
+    unableToLoad: 'Ntibishoboye gukurura ibicuruzwa',
+    tryAgain: 'Ongera ugerageze',
+    noItemsFound: 'Nta bicuruzwa bibonetse',
+    noProductsListed: 'Nta bicuruzwa biri muri iki cyiciro muri iki gihe.',
+    searchPrompt: 'Andika icyo ushaka gushakisha mu bicuruzwa byacu.',
+    searchTitle: 'Shakisha muri D&G',
+    noMatchingTitle: 'Nta bicuruzwa bihwanye n’ibyo ushaka',
+    noMatchingDesc: 'Nta gicuruzwa cyabonetse. Gerageza gukoresha irindi jambo.',
+    quantity: 'Ingano',
+    addedToCart: 'Byashyizwe mu Ikarita',
+    productDetails: 'Ibisobanuro by’Igicuruzwa',
+    description: 'Ibisobanuro',
+    deliveryAddresses: 'Aho wohereza ibicuruzwa',
+    languageSettings: 'Hitamo Ururimi',
+    chooseLanguage: 'Hitamo ururimi wifuza gukoresha',
+    languageAppliedNote: 'Impinduka z’ururimi zihita zikoreshwa ako kanya mu bice byose by’iyi porogaramu.',
+    contactWhatsApp: 'Vugana na DG kuri WhatsApp',
+
+    // Auth & Accounts
+    signInPrompt: 'Injira muri Konti yawe',
+    signInPromptDesc: 'Injira kugira ngo urebe amategeko yawe, aho wohereza, n’ibigenga konti.',
+    createAccount: 'Fungura Konti',
+    createAccountSubtitle: 'Fungura konti yo guhaha muri DG',
+    signInSubtitle: 'Injira muri konti yawe',
+    emailAddress: 'Imeyili',
+    password: 'Ijambobanga',
+    noAccount: 'Nta konti ufite?',
+    haveAccount: 'Usanzwe ufite konti?',
+    register: 'Iyandikishe',
+    customerGuest: 'Umukiriya',
+    customerTracking: 'Igenzura rya',
+
+    // Orders & Tracking
+    emptyOrders: 'Nta tegeko uratanga',
+    emptyOrdersDesc: 'Iyo utanze itegeko, rihita rigaragara hano.',
+    orderNumber: 'Itegeko #',
+    placedOn: 'Ryatsinzwe ku ya',
+    viewDetails: 'Reba Byose',
 
     // Admin Features
     manageProducts: 'Gucunga Ibicuruzwa',
@@ -183,6 +310,7 @@ export const translations = {
     stockLeft: 'bisigaye mu bubiko',
 
     // Statuses
+    pending: 'Gitegerejwe',
     pending_confirmation: 'Gitegereje Kwemezwa',
     confirmed: 'Cyemejwe',
     processing: 'Kiratunganywa',
@@ -213,4 +341,46 @@ export const translations = {
       'Icyitonderwa: Itegeko riguma ritegereje kwishyurwa kugeza ubwo umuyobozi wa DG abyemeje.',
     languageName: 'Ikinyarwanda',
   },
+};
+
+export const getCategoryTranslation = (name: string, t: any): string => {
+  if (!name) return '';
+  const lower = name.toLowerCase().trim();
+  if (lower === 'all' || lower === 'all items' || lower === 'byose hamwe') {
+    return t.allItems || 'All Items';
+  }
+  if (lower === 'clothes' || lower === 'imyenda') return t.catClothes || 'Clothes';
+  if (lower === 'shoes' || lower === 'inkweto') return t.catShoes || 'Shoes';
+  if (lower === 'bags' || lower === 'amasakoshi') return t.catBags || 'Bags';
+  if (lower.includes('household') || lower.includes('ibikoresho')) {
+    return t.catHousehold || 'Household equipment';
+  }
+  if (lower.includes('jewel') || lower.includes('imikufi')) {
+    return t.catJewellery || 'Jewellery';
+  }
+  if (lower.includes('cosmetic') || lower.includes('amavuta')) {
+    return t.catCosmetics || 'Cosmetics';
+  }
+  return name;
+};
+
+export const getCategoryDescription = (slug: string, t: any): string => {
+  if (!slug) return '';
+  switch (slug) {
+    case 'clothes':
+      return t.catClothesDesc || 'Men, women, and children fashion & apparel';
+    case 'shoes':
+      return t.catShoesDesc || 'Casual, formal, athletic footwear and boots';
+    case 'bags':
+      return t.catBagsDesc || 'Handbags, backpacks, clutches, and travel gear';
+    case 'household-equipment':
+    case 'household':
+      return t.catHouseholdDesc || 'Home appliances, kitchenware, and living essentials';
+    case 'jewellery':
+      return t.catJewelleryDesc || 'Watches, necklaces, rings, bracelets, and accessories';
+    case 'cosmetics':
+      return t.catCosmeticsDesc || 'Skincare, beauty products, perfumes, and care';
+    default:
+      return '';
+  }
 };
