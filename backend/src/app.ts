@@ -30,6 +30,11 @@ app.use('/api', apiRateLimiter);
 // Apply strict rate limiter to authentication routes
 app.use('/api/v1/auth', authRateLimiter);
 
+// Lightweight Keep-Alive Ping (Zero DB overhead to preserve Neon free compute hours)
+app.get('/ping', (_req: Request, res: Response) => {
+  res.status(200).send('pong');
+});
+
 // Health Check Endpoint (Proves Neon connection)
 app.get('/api/health', async (_req: Request, res: Response) => {
   try {

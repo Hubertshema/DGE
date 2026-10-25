@@ -1,0 +1,43 @@
+name: Keep Render Active
+
+on:
+  schedule:
+    # Runs every 14 minutes to prevent Render's 15-minute inactivity spin-down
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allows manual testing anytime via GitHub Actions tab
+
+jobs:
+  keep-alive:
+    name: Ping Render Service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send HTTP Ping
+        env:
+          RENDER_URL: ${{ secrets.RENDER_URL }}
+        run: |
+          # Fallback if secret is not set yet
+          BASE_URL="${RENDER_URL}"
+          if [ -z "$BASE_URL" ]; then
+            echo "⚠️ RENDER_URL secret is not set in GitHub repository settings!"
+            echo "Please add RENDER_URL in GitHub: Settings -> Secrets and variables -> Actions"
+            exit 1
+          fi
+
+          # Ensure no trailing slash
+          CLEAN_URL="${BASE_URL%/}"
+          TARGET_URL="${CLEAN_URL}/ping"
+
+          echo "Pinging: $TARGET_URL at $(date -u)"
+          HTTP_RESPONSE=$(curl -sSL -w "\n%{http_code}" "$TARGET_URL")
+          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed '$d')
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n1)
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response Body: $HTTP_BODY"
+
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 400 ]; then
+            echo "✅ Server responded successfully. Render instance is active."
+          else
+            echo "❌ Ping failed with status $HTTP_STATUS"
+            exit 1
+          fi
