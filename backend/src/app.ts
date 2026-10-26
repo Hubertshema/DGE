@@ -7,6 +7,7 @@ import productsRouter from './routes/products';
 import ordersRouter from './routes/orders';
 import categoriesRouter from './routes/categories';
 import notificationsRouter from './routes/notifications';
+import updatesRouter from './routes/updates';
 
 import { env } from './config/env';
 import { authRateLimiter, apiRateLimiter } from './middleware/rateLimiter';
@@ -66,6 +67,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/orders', ordersRouter);
 app.use('/api/v1/notifications', notificationsRouter);
+app.use('/api/v1/updates', updatesRouter);
 
 
 // Centralized error handler

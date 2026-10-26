@@ -16,7 +16,9 @@ class MainApplication : Application(), ReactApplication {
         PackageList(this).packages.apply {
           // Packages that cannot be autolinked yet can be added manually here:
           add(com.dgecommerce.notification.DGNotificationPackage())
+          add(com.dgecommerce.update.DGUpdatePackage())
         },
+      jsBundleFilePath = com.dgecommerce.update.DGUpdateModule.getActiveBundlePath(this)
     )
   }
 

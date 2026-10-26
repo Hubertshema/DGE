@@ -12,6 +12,7 @@ import { useAppStateFocus } from './src/api/useAppStateFocus';
 import { AuthProvider } from './src/state/AuthContext';
 import { NotificationProvider } from './src/state/NotificationContext';
 import { CartProvider } from './src/state/CartContext';
+import { UpdateProvider } from './src/state/UpdateContext';
 import { LanguageProvider } from './src/localization/LanguageContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { colors } from './src/theme';
@@ -35,7 +36,9 @@ function App(): React.JSX.Element {
           <AuthProvider>
             <NotificationProvider>
               <CartProvider>
-                <AppNavigator />
+                <UpdateProvider>
+                  <AppNavigator />
+                </UpdateProvider>
               </CartProvider>
             </NotificationProvider>
           </AuthProvider>

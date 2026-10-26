@@ -43,6 +43,7 @@ export type RootStackParamList = {
   // Profile & Settings
   EditProfile: undefined;
   LanguageSettings: undefined;
+  AppUpdate: undefined;
 
   // Admin Protected Portal (DG Owner)
   AdminDashboard: undefined;

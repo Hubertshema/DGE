@@ -181,3 +181,30 @@ CREATE TABLE IF NOT EXISTS device_push_tokens (
 );
 
 CREATE INDEX IF NOT EXISTS idx_push_tokens_user ON device_push_tokens(user_id);
+
+-- App Releases & OTA Remote Updates Table
+CREATE TABLE IF NOT EXISTS app_releases (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    version VARCHAR(30) NOT NULL,
+    build_number INTEGER NOT NULL,
+    runtime_version VARCHAR(30) NOT NULL,
+    platform VARCHAR(20) NOT NULL DEFAULT 'android',
+    update_type VARCHAR(20) NOT NULL CHECK (update_type IN ('ota', 'ota_bundle', 'native', 'native_apk')),
+    bundle_url TEXT,
+    bundle_hash VARCHAR(64),
+    bundle_size_bytes BIGINT,
+    apk_url TEXT,
+    release_notes TEXT,
+    is_mandatory BOOLEAN NOT NULL DEFAULT false,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    channel VARCHAR(20) NOT NULL DEFAULT 'production' CHECK (channel IN ('development', 'staging', 'production')),
+    min_supported_version VARCHAR(30),
+    published_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE app_releases DROP CONSTRAINT IF EXISTS app_releases_update_type_check;
+ALTER TABLE app_releases ADD CONSTRAINT app_releases_update_type_check CHECK (update_type IN ('ota', 'ota_bundle', 'native', 'native_apk'));
+
+CREATE INDEX IF NOT EXISTS idx_app_releases_lookup ON app_releases(platform, channel, is_active, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_app_releases_version ON app_releases(version, runtime_version);

@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "start": "react-native start",
     "start:reset": "react-native start --reset-cache",
-    "test": "jest"
+    "test": "jest",
+    "publish:ota": "node scripts/publish-ota.js"
   },
   "dependencies": {
     "@neon/config": "^1.9.3",

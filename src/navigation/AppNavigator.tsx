@@ -27,6 +27,7 @@ import { LoginScreen } from '../features/auth/screens/LoginScreen';
 import { RegisterScreen } from '../features/auth/screens/RegisterScreen';
 import { ChangePasswordScreen } from '../features/auth/screens/ChangePasswordScreen';
 import { NotificationCenterScreen } from '../features/notifications/screens/NotificationCenterScreen';
+import { UpdateScreen } from '../features/updates/screens/UpdateScreen';
 
 // Admin Screens
 import { SellerDashboardScreen } from '../features/seller/screens/SellerDashboardScreen';
@@ -163,6 +164,7 @@ export const AppNavigator: React.FC = () => {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+        <Stack.Screen name="AppUpdate" component={UpdateScreen} />
 
         {/* Protected Admin Stack (DG Owner) */}
         <Stack.Screen name="AdminDashboard" component={SellerDashboardScreen} />

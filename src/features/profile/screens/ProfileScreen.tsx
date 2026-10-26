@@ -21,7 +21,9 @@ import {
   Lock,
   Calendar,
   ShoppingBag,
+  DownloadCloud,
 } from 'lucide-react-native';
+import { useUpdate } from '../../../state/UpdateContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -30,6 +32,7 @@ export const ProfileScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { user, token, isAuthenticated, logout, isAdmin, isSeller } = useAuth();
   const { t, currentLanguage } = useLanguage();
+  const { updateInfo } = useUpdate();
 
   // If not authenticated, redirect immediately to Login / Sign-in page
   useEffect(() => {
@@ -303,6 +306,29 @@ export const ProfileScreen: React.FC = () => {
               </Text>
             </View>
             <ChevronRight size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* System & Updates */}
+        <View style={styles.menuSection}>
+          <Text style={styles.sectionTitle}>System & Updates</Text>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate('AppUpdate')}
+          >
+            <View style={styles.menuItemLeft}>
+              <DownloadCloud size={20} color={colors.primary} />
+              <Text style={styles.menuItemText}>Check for Updates</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {updateInfo?.updateAvailable ? (
+                <View style={{ marginRight: spacing.sm }}>
+                  <Badge label="New" variant="accent" size="small" />
+                </View>
+              ) : null}
+              <ChevronRight size={18} color={colors.textSecondary} />
+            </View>
           </TouchableOpacity>
         </View>
 
