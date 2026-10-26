@@ -185,18 +185,27 @@ async function runE2ETests() {
   }
   console.log(`   ✅ Payment verified as PAID by Admin. Notes: "${verifyData.data.payment_notes}"`);
 
-  // 9. Admin Updates Fulfillment Status
+  // 9. Admin Updates Fulfillment Status (Must adhere to backend state machine transitions)
   console.log('\n9️⃣ Admin Updates Order Fulfillment Status...');
-  const statusRes = await fetch(`${BASE_URL}/orders/${order.id}/status`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${adminToken}`,
-    },
-    body: JSON.stringify({ status: 'delivered' }),
-  });
-  const statusData: any = await statusRes.json();
-  console.log(`   ✅ Fulfillment status updated to: "${statusData.data.status}"`);
+  const lifecycle = ['confirmed', 'processing', 'shipped', 'delivered'];
+  let lastStatus = 'pending_confirmation';
+  for (const nextStatus of lifecycle) {
+    const statusRes = await fetch(`${BASE_URL}/orders/${order.id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify({ status: nextStatus }),
+    });
+    const statusData: any = await statusRes.json();
+    if (!statusData.success) {
+      throw new Error(`Failed to update status from ${lastStatus} to ${nextStatus}: ${statusData.error}`);
+    }
+    lastStatus = statusData.data.status;
+    console.log(`   -> Advanced to: "${lastStatus}"`);
+  }
+  console.log(`   ✅ Fulfillment status successfully completed to terminal: "${lastStatus}"`);
 
   // 10. Admin Sales Reports & Analytics
   console.log('\n🔟 Testing Admin Sales Reports & Analytics...');

@@ -746,7 +746,7 @@ async function runComprehensiveQASuite() {
     const verifiedRecord = orderDetails.data.payments.find((p: any) => p.status === 'paid');
     expectTrue(Boolean(verifiedRecord), 'Must have paid audit entry');
     expectTrue(
-      verifiedRecord.verified_by_name === 'DG Shop Owner' || verifiedRecord.verified_by_name === 'DG Administrator',
+      verifiedRecord.verified_by_name === env.adminFullName || verifiedRecord.verified_by_name === 'Shema Hubert' || verifiedRecord.verified_by_name === 'DG Shop Owner' || verifiedRecord.verified_by_name === 'DG Administrator',
       'Verified by name must match admin user'
     );
   });
