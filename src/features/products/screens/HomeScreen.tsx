@@ -125,6 +125,11 @@ export const HomeScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* Live Remote Updates Active Badge Banner */}
+      <View style={styles.otaBanner}>
+        <Text style={styles.otaBannerText}>⚡ DG E-Commerce • Rwamagana — Live OTA Updates Active (v0.0.3)</Text>
+      </View>
+
       {/* Category Pills Filter */}
       <View style={styles.categoryBar}>
         <ScrollView
@@ -410,5 +415,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     maxWidth: 290,
+  },
+  otaBanner: {
+    backgroundColor: '#008751',
+    paddingVertical: 7,
+    paddingHorizontal: spacing.md,
+    marginHorizontal: spacing.md,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  otaBannerText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });

@@ -57,8 +57,8 @@ router.get('/check', async (req: Request<{}, {}, {}, UpdateCheckQuery>, res: Res
 
     const latest = result.rows[0];
 
-    // Check if client is already at or above latest build number
-    if (clientBuildNumber >= latest.buildNumber) {
+    // Check if client is already at or above latest build number or same version
+    if (clientBuildNumber >= latest.buildNumber || clientVersion === latest.version) {
       return res.json({
         success: true,
         data: {

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Alert, Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { updateService, UpdateInfo, NativeBundleInfo, APP_CONFIG } from '../services/updateService';
 
 export type UpdateStatus = 'idle' | 'checking' | 'downloading' | 'ready_to_reload' | 'up_to_date' | 'error';
@@ -22,6 +23,7 @@ const UpdateContext = createContext<UpdateContextType | undefined>(undefined);
 
 export const UpdateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentVersion, setCurrentVersion] = useState<string>(APP_CONFIG.version);
+  const [currentBuildNumber, setCurrentBuildNumber] = useState<number>(APP_CONFIG.buildNumber);
   const [nativeBundleInfo, setNativeBundleInfo] = useState<NativeBundleInfo | null>(null);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [status, setStatus] = useState<UpdateStatus>('idle');
@@ -34,11 +36,21 @@ export const UpdateProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     async function init() {
       try {
+        const [storedVersion, storedBuild] = await Promise.all([
+          AsyncStorage.getItem('@dg_active_version'),
+          AsyncStorage.getItem('@dg_active_build_number'),
+        ]);
+
         const info = await updateService.getNativeBundleInfo();
         if (isMounted) {
           setNativeBundleInfo(info);
-          if (info.version) {
+          if (info.version && info.bundleSource === 'ota') {
             setCurrentVersion(info.version);
+          } else if (storedVersion) {
+            setCurrentVersion(storedVersion);
+          }
+          if (storedBuild) {
+            setCurrentBuildNumber(parseInt(storedBuild, 10));
           }
         }
       } catch (err) {
@@ -67,7 +79,8 @@ export const UpdateProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     try {
       const activeVersion = nativeBundleInfo?.version || currentVersion;
-      const data = await updateService.checkForUpdate(activeVersion);
+      const activeBuild = currentBuildNumber || (nativeBundleInfo?.bundleSource === 'ota' ? 2 : APP_CONFIG.buildNumber);
+      const data = await updateService.checkForUpdate(activeVersion, activeBuild);
 
       setUpdateInfo(data);
 
@@ -86,7 +99,7 @@ export const UpdateProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
       return null;
     }
-  }, [status, nativeBundleInfo, currentVersion]);
+  }, [status, nativeBundleInfo, currentVersion, currentBuildNumber]);
 
   const downloadAndApplyUpdate = useCallback(async () => {
     if (!updateInfo || !updateInfo.updateAvailable) {
@@ -133,6 +146,15 @@ export const UpdateProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       setDownloadProgress(1.0);
       setStatus('ready_to_reload');
+
+      if (updateInfo.updateVersion) {
+        setCurrentVersion(updateInfo.updateVersion);
+        await AsyncStorage.setItem('@dg_active_version', updateInfo.updateVersion);
+      }
+      if (updateInfo.buildNumber) {
+        setCurrentBuildNumber(updateInfo.buildNumber);
+        await AsyncStorage.setItem('@dg_active_build_number', String(updateInfo.buildNumber));
+      }
 
       Alert.alert(
         'Update Ready',
