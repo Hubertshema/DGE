@@ -205,6 +205,7 @@ CREATE TABLE IF NOT EXISTS app_releases (
 
 ALTER TABLE app_releases DROP CONSTRAINT IF EXISTS app_releases_update_type_check;
 ALTER TABLE app_releases ADD CONSTRAINT app_releases_update_type_check CHECK (update_type IN ('ota', 'ota_bundle', 'native', 'native_apk'));
+ALTER TABLE app_releases ADD COLUMN IF NOT EXISTS bundle_data BYTEA;
 
 CREATE INDEX IF NOT EXISTS idx_app_releases_lookup ON app_releases(platform, channel, is_active, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_app_releases_version ON app_releases(version, runtime_version);

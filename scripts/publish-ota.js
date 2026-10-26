@@ -163,6 +163,7 @@ async function main() {
       bundleUrl,
       bundleHash: sha256,
       bundleSizeBytes: sizeBytes,
+      bundleBase64: fileBuffer.toString('base64'),
       releaseNotes,
       isMandatory,
     };

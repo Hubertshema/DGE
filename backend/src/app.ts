@@ -23,7 +23,8 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.raw({ type: 'application/octet-stream', limit: '50mb' }));
 
 // Apply general API rate limiter
 app.use('/api', apiRateLimiter);

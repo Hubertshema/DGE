@@ -102,20 +102,87 @@ router.get('/check', async (req: Request<{}, {}, {}, UpdateCheckQuery>, res: Res
   }
 });
 
-// Public: Serve static OTA Hermes bundles
-router.get('/bundles/:filename', (req: Request, res: Response) => {
-  const filename = String(req.params.filename);
-  // Sanitize filename to prevent directory traversal
-  const safeFilename = path.basename(filename);
-  const filePath = path.join(BUNDLES_DIR, safeFilename);
+// Public: Serve static OTA Hermes bundles (with database fallback)
+router.get('/bundles/:filename', async (req: Request, res: Response) => {
+  try {
+    const filename = String(req.params.filename);
+    // Sanitize filename to prevent directory traversal
+    const safeFilename = path.basename(filename);
+    const filePath = path.join(BUNDLES_DIR, safeFilename);
 
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ success: false, error: 'Bundle file not found.' });
+    // 1. If bundle exists on local disk, stream it directly
+    if (fs.existsSync(filePath)) {
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return res.sendFile(filePath);
+    }
+
+    // 2. If not on local disk (e.g. freshly booted Render instance), fetch from Neon database
+    const result = await query(
+      `SELECT bundle_data
+       FROM app_releases
+       WHERE bundle_url LIKE '%' || $1 AND bundle_data IS NOT NULL
+       ORDER BY build_number DESC, created_at DESC
+       LIMIT 1`,
+      [safeFilename]
+    );
+
+    if (result.rows.length === 0 || !result.rows[0].bundle_data) {
+      return res.status(404).json({ success: false, error: 'Bundle file not found on server or database.' });
+    }
+
+    const bundleBuffer: Buffer = result.rows[0].bundle_data;
+
+    // Cache to local disk for subsequent fast serving
+    try {
+      fs.writeFileSync(filePath, bundleBuffer);
+    } catch (writeErr) {
+      console.warn('[Updates] Failed to write local bundle cache:', writeErr);
+    }
+
+    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('Content-Length', bundleBuffer.length.toString());
+    return res.send(bundleBuffer);
+  } catch (error: any) {
+    console.error('[Updates] Error serving bundle:', error);
+    return res.status(500).json({ success: false, error: 'Failed to retrieve bundle file.' });
   }
+});
 
-  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  res.sendFile(filePath);
+// Admin: Upload raw binary bundle directly to server and database
+router.put('/bundles/:filename', authenticateToken, requireAdmin, async (req: AuthRequest, res: Response) => {
+  try {
+    const filename = String(req.params.filename);
+    const safeFilename = path.basename(filename);
+    const filePath = path.join(BUNDLES_DIR, safeFilename);
+
+    let buffer: Buffer;
+    if (Buffer.isBuffer(req.body)) {
+      buffer = req.body;
+    } else if (typeof req.body === 'string') {
+      buffer = Buffer.from(req.body);
+    } else {
+      return res.status(400).json({ success: false, error: 'Raw binary body expected.' });
+    }
+
+    fs.writeFileSync(filePath, buffer);
+
+    // Update database bundle_data for this filename
+    await query(
+      `UPDATE app_releases
+       SET bundle_data = $1
+       WHERE bundle_url LIKE '%' || $2`,
+      [buffer, safeFilename]
+    );
+
+    res.json({
+      success: true,
+      message: `Bundle ${safeFilename} (${buffer.length} bytes) successfully stored in database and server cache.`,
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 // Admin: Publish new release (OTA Bundle or Native APK)
@@ -129,6 +196,7 @@ router.post('/publish', authenticateToken, requireAdmin, async (req: AuthRequest
     bundleUrl,
     bundleHash,
     bundleSizeBytes,
+    bundleBase64,
     apkUrl,
     releaseNotes,
     isMandatory = false,
@@ -160,14 +228,29 @@ router.post('/publish', authenticateToken, requireAdmin, async (req: AuthRequest
     });
   }
 
+  let bundleBuffer: Buffer | null = null;
+  if (bundleBase64) {
+    bundleBuffer = Buffer.from(bundleBase64, 'base64');
+    if (bundleUrl) {
+      const safeFilename = path.basename(bundleUrl);
+      const filePath = path.join(BUNDLES_DIR, safeFilename);
+      try {
+        fs.writeFileSync(filePath, bundleBuffer);
+      } catch (e) {
+        console.warn('[Updates] Failed to write bundle to disk cache:', e);
+      }
+    }
+  }
+
   try {
     const result = await query(
       `INSERT INTO app_releases (
         version, build_number, runtime_version, platform, update_type,
         bundle_url, bundle_hash, bundle_size_bytes, apk_url,
-        release_notes, is_mandatory, is_active, channel, min_supported_version, published_by
+        release_notes, is_mandatory, is_active, channel, min_supported_version, published_by,
+        bundle_data
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, $12, $13, $14, $15)
       RETURNING *`,
       [
         version.trim(),
@@ -184,6 +267,7 @@ router.post('/publish', authenticateToken, requireAdmin, async (req: AuthRequest
         channel.toLowerCase(),
         minSupportedVersion ? minSupportedVersion.trim() : null,
         req.user!.id,
+        bundleBuffer,
       ]
     );
 
